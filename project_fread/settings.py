@@ -31,13 +31,46 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'users',
+    'analyses',
+    'contests',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'rest_framework', # drf
+    'drf_spectacular', #  스펙타큘러 추가 -> swagger
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.kakao',
+
+    'django.contrib.sites',  # allauth 필수
 ]
+
+# for swagger
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # 다른 REST Framework 설정이 있다면 유지합니다.
+}
+
+SITE_ID = 1
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': '개인 작가 agent 서비스 API', # 서비스 이름 (헤더)
+    'DESCRIPTION': '개인 작가 agent 서비스 API 문서입니다.', # 서비스 설명
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # 필요한 다른 Spectacular 설정이 있다면 추가합니다.
+}
+
+# 로그인 리디렉션 설정 등도 필요시 추가
+LOGIN_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -103,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr' # 한국어로 수정
 
 TIME_ZONE = 'UTC'
 
@@ -115,9 +148,21 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+# 미디어 파일 설정 (이미지 업로드용)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# 정적 파일 설정 (Swagger CSS, JS 등 포함)
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic 용
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 인증 모델 설정
+AUTH_USER_MODEL = 'users.User'
+
+# Django의 send_mail() 같은 기능 또는 allauth의 비밀번호 초기화 기능을 사용하면 필요함
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
