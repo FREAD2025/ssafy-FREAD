@@ -69,6 +69,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 # 로그인 리디렉션 설정 등도 필요시 추가
+# 로그인, 로그아웃 리디렉션 경로
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
@@ -154,7 +155,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # 정적 파일 설정 (Swagger CSS, JS 등 포함)
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic 용
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # 배포용 모음 폴더
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
