@@ -11,71 +11,95 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os 
+from dotenv import load_dotenv
+import environ
 
+# 프로젝트의 기본 경로 설정
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# OpenAI API Key 가져오기
+load_dotenv(dotenv_path=BASE_DIR / ".env")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# SECRET_KEY = os.getenv("SECRET_KEY", "default-key-if-not-found")
+# DEBUG = os.getenv("DEBUG", "False") == "True"
+
+# 카카오 API Key 가져오기
+KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
+# 반드시 카카오 개발자센터에서 다음 항목을 설정해야 함
+# Redirect URI:
+# 예: http://localhost:8000/accounts/kakao/login/callback/
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# 보안 및 디버그 설정
 SECRET_KEY = 'django-insecure-0h-&0i*97nn^kh9d_j8sfzdu@169-)^2xxjl^4lj(ec$rrven9'
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = []
 
 
-# Application definition
-
+# 설치된 앱 목록
 INSTALLED_APPS = [
+    # 사용자 정의 앱
     'users',
     'analyses',
     'contests',
+    ## django 기본 앱
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    'rest_framework', # drf
-    'drf_spectacular', #  스펙타큘러 추가 -> swagger
-
+     ## 소셜 로그인
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.kakao',
-
-    'django.contrib.sites',  # allauth 필수
+    # DRF + Swagger 문서화
+    'rest_framework', 
+    'drf_spectacular', 
 ]
 
-# for swagger
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    # 다른 REST Framework 설정이 있다면 유지합니다.
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-    ], # 회원가입 후 자동 로그인을 위해 설정
+# 인증 백엔드 설정 (allauth)
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend', # 기본 인증 백엔드
+    'allauth.account.auth_backends.AuthenticationBackend', # 소셜 로그인 백에드
+]
+
+# 소셜 로그인 설정 (카카오)
+SITE_ID = 1 # allauth에서 사이트를 구분하기 위해 필요 (기본 1번 사용)
+SOCIALACCOUNT_PROVIDERS = {
+    'kakao': {
+        'APP': {
+            'client_id': os.getenv('KAKAO_REST_API_KEY'),
+            'secret': '',  # 카카오 REST API 키에는 secret이 없음
+            'key': ''
+        },
+        'AUTH_PARAMS': {
+            'response_type': 'code',
+        },
+        'INIT_PARAMS': {
+            'scope': 'account_email profile',
+        },
+        'PROCESS': 'login_on_get'
+    }
 }
 
-SITE_ID = 1
-
-SPECTACULAR_SETTINGS = {
-    'TITLE': '개인 작가 agent 서비스 API', # 서비스 이름 (헤더)
-    'DESCRIPTION': '개인 작가 agent 서비스 API 문서입니다.', # 서비스 설명
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-    # 필요한 다른 Spectacular 설정이 있다면 추가합니다.
-}
-
-# 로그인 리디렉션 설정 등도 필요시 추가
-# 로그인, 로그아웃 리디렉션 경로
+# 로그인/로그아웃 후 리디렉션 경로 설정
 LOGIN_REDIRECT_URL = '/'
+# 예. LOGIN_REDIRECT_URL = 'books:index'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+# 예. ACCOUNT_LOGOUT_REDIRECT_URL = 'index'
+ACCOUNT_LOGOUT_ON_GET = True 
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
+# 미들웨어 설정
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -84,10 +108,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware', # allauth에 필수
 ]
 
+# URL 설정
 ROOT_URLCONF = 'project_fread.urls'
 
+# 템플릿 설정
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -96,20 +123,25 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',
+                'django.template.context_processors.request', # allauth에 필수
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
+"""
+나중에 vue로 구현할 때 필요하면 설정하기
+"DIRS": [
+            BASE_DIR / "templates",
+        ],
+"""
 
+# WSGI 설정
 WSGI_APPLICATION = 'project_fread.wsgi.application'
 
-
-# Database
+# 데이터베이스 설정
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -117,10 +149,8 @@ DATABASES = {
     }
 }
 
-
-# Password validation
+# 비밀번호 유효성 검사기 설정
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -137,42 +167,46 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+# 국제화 설정
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
-
 LANGUAGE_CODE = 'ko-kr' # 한국어로 수정
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# 정적/미디어 파일 설정 (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic 용
 
-# 미디어 파일 설정 (이미지 업로드용)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-# 정적 파일 설정 (Swagger CSS, JS 등 포함)
-STATIC_URL = '/static/'
-
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # 배포용 모음 폴더
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# 인증 모델 설정
+# 커스텀 사용자 모델 설정
 AUTH_USER_MODEL = 'users.User'
 
+# 개발용 이메일 출력용 (콘솔)
 # Django의 send_mail() 같은 기능 또는 allauth의 비밀번호 초기화 기능을 사용하면 필요함
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# DRF 설정
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ], # 회원가입 후 자동 로그인을 위해 설정
+}
+
+# Swagger 설정
+SPECTACULAR_SETTINGS = {
+    'TITLE': '개인 작가 agent 서비스 API', # 서비스 이름 (헤더)
+    'DESCRIPTION': '개인 작가 agent 서비스 API 문서입니다.', # 서비스 설명
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
