@@ -72,6 +72,7 @@ class User(AbstractUser):
     profile_image = models.ImageField(
         upload_to='profile_pics/', # MEDIA_ROOT/profile_pics/ 경로에 저장
         blank=True, # 선택 사항 
+        null=True, # ImageField로 DB에 NULL 값을 저장할 수 있도록 함
         verbose_name='프로필 사진'
     )
     # 소셜 로그인 가입 여부
