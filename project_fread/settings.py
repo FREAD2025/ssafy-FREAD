@@ -56,6 +56,9 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 다른 REST Framework 설정이 있다면 유지합니다.
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ], # 회원가입 후 자동 로그인을 위해 설정
 }
 
 SITE_ID = 1
