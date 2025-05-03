@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import SignupSerializer, SocialExtraInfoSerializer
+from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer
 from django.contrib.auth import login as auth_login
 from drf_spectacular.utils import extend_schema, OpenApiResponse # swagger
 from rest_framework.permissions import IsAuthenticated
@@ -46,3 +46,28 @@ def social_extra_info(request):
     if serializer.is_valid(raise_exception=True):
         serializer.save() # Serializer의 update 메서드 호출
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+# 로그인 (/api/v1/users/login/)
+@extend_schema(
+    summary="사용자 로그인 (세션 기반)",
+    description="제공된 아이디와 비밀번호로 사용자를 인증하고, 성공하면 세션을 생성합니다.",
+    request=LoginSerializer,
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(description="로그인 성공"),
+        status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="잘못된 요청 데이터"),
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="인증 실패 (아이디 또는 비밀번호 오류)"),
+    }
+)
+@api_view(['POST'])
+def login(request):
+    # 1. 요청 데이터(username, password) 직렬화
+    serializer = LoginSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        user = serializer.validated_data # Serializer의 validate 메서드에서 반환된 User 객체
+        auth_login(request, user)
+        return Response({'message': '로그인 성공', 'user': {'id': user.pk, 'username': user.username, 'email': user.email, 'name': user.name}}, status=status.HTTP_200_OK)
+
+# 로그아웃
+@api_view(['POST'])
+def logout(request):
+    pass

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Genre
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-
+from django.contrib.auth import authenticate
 User = get_user_model()
 
 # 장르 (읽기 전용) : GET /api/v1/users/mypage/ , /api/v1/users/profile/
@@ -185,3 +185,21 @@ class SocialExtraInfoSerializer(serializers.ModelSerializer):
         instance.is_profile_completed = True
         instance.save() # 변경된 내용을 데이터베이스에 저장합니다.
         return instance # 업데이트된 User 모델 인스턴스를 반환합니다.
+
+# 로그인 : POST /api/v1/users/login/
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True, help_text="사용자 아이디")
+    password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'}, help_text="비밀번호")
+
+    def validate(self, data):
+        # data 예시: {'username': 'test', 'password': '1234'}
+        # authenticate(): Django의 내장 함수로, 주어진 사용자 이름과 비밀번호로
+        # 데이터베이스에서 해당 User 객체를 찾아서
+        # 인증에 성공하면 User 객체를 반환하고, 실패하면 None을 반환함
+        user = authenticate(**data)
+        # 예. **data로 authenticate(username='test', password='1234')와 동일함
+
+        if user and user.is_active: # 인증에 성공했고, 해당 사용자가 활성화되어 있다면
+            return user
+        # 인증에 실패하거나 사용자가 비활성화된 상태라면
+        raise serializers.ValidationError("아이디 또는 비밀번호가 올바르지 않습니다.")
