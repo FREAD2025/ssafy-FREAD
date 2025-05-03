@@ -203,3 +203,8 @@ class LoginSerializer(serializers.Serializer):
             return user
         # 인증에 실패하거나 사용자가 비활성화된 상태라면
         raise serializers.ValidationError("아이디 또는 비밀번호가 올바르지 않습니다.")
+    
+# ID 찾기 : POST /api/v1/users/find-id/
+class FindIdSerializer(serializers.Serializer):
+    # 이메일 주소 입력받기
+    email = serializers.EmailField(required=True, help_text="가입 시 사용한 이메일 주소를 입력하세요")

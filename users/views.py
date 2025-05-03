@@ -1,11 +1,13 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer
+from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from drf_spectacular.utils import extend_schema, OpenApiResponse # swagger
 from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
+
 
 # 회원 가입 (/api/v1/users/signup/)
 @extend_schema( # swagger에서 표시
@@ -104,3 +106,30 @@ def session_check(request):
             "email": request.user.email
         }
     }, status=200)
+
+# ID 찾기 (/api/v1/users/find-id/)
+@extend_schema(
+    summary="아이디 찾기 (이메일로 바로 확인)",
+    description="제공된 이메일 주소와 일치하는 사용자의 아이디를 데이터베이스에서 찾아 즉시 반환합니다.",
+    request=FindIdSerializer,
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(response={'username': str}, description="아이디 찾기 성공, 아이디 반환"),
+        status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="유효하지 않은 요청 데이터"),
+        status.HTTP_404_NOT_FOUND: OpenApiResponse(description="해당 이메일 주소로 등록된 사용자 없음"),
+    }
+)
+@api_view(['POST'])
+def find_id(request):
+    User = get_user_model()
+    serializer = FindIdSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        email = serializer.validated_data['email'] # 유효성 검사를 통과한 validated_data에서 email 정보 가져오기
+        # validated_data: OrderedDict([('email', 'testuser@example.com')])
+        try:
+            user = User.objects.get(email=email) # 제공된 email에 정확히 일치하는 User 객체 반환
+            # 아이디 일부 마스킹 (예: 앞 2글자 + 나머지 '*' 처리)
+            username_masked = user.username[:2] + '*' * (len(user.username) - 2) # 아이디 일부 마스킹 처리
+            return Response({'username': username_masked}, status=status.HTTP_200_OK)
+        except User.DoesNotExist: # 제공된 email과 대응되는 user를 찾지 못했다면
+            return Response({'detail': '해당 이메일 주소로 등록된 사용자를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) # 유효성 감사에 실패했다면 400 에러
