@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer, PasswordResetSerializer
+from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer, PasswordResetSerializer, PasswordChangeSerializer
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from drf_spectacular.utils import extend_schema, OpenApiResponse # swagger
@@ -174,3 +174,24 @@ def password_reset_request(request):
         return Response({'message': '임시 비밀번호가 이메일로 발송되었습니다. 로그인 후 비밀번호를 변경해 주세요.'}, status=status.HTTP_200_OK)
     except User.DoesNotExist: # 이메일과 일치하는 user가 없다면
         return Response({'detail': '해당 이메일 주소로 등록된 사용자를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+
+# 비밀번호 변경 (/api/v1/users/password/change/)
+@extend_schema(
+    summary="비밀번호 변경",
+    description="현재 로그인된 사용자의 기존 비밀번호를 확인한 뒤, 새 비밀번호로 변경합니다.",
+    request=PasswordChangeSerializer,
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(description="비밀번호 변경 성공"),
+        status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="잘못된 요청 데이터 (비밀번호 불일치, 형식 오류 등)"),
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="로그인되지 않은 사용자"),
+    }
+)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated]) # 로그인된 사용자만 가능
+def password_change(request):
+    serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+    
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        return Response({'message': '비밀번호가 성공적으로 변경되었습니다.'}, status=status.HTTP_200_OK)
+
