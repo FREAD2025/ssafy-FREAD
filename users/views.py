@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer, PasswordResetSerializer, PasswordChangeSerializer
+from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer, PasswordResetSerializer, PasswordChangeSerializer, ProfileSerializer
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from drf_spectacular.utils import extend_schema, OpenApiResponse # swagger
@@ -67,7 +67,7 @@ def social_extra_info(request):
 )
 @api_view(['POST'])
 def login(request):
-    # 1. 요청 데이터(username, password) 직렬화
+    # 요청 데이터(username, password) 직렬화
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         user = serializer.validated_data # Serializer의 validate 메서드에서 반환된 User 객체
@@ -78,6 +78,7 @@ def login(request):
 @extend_schema(
     summary="사용자 로그아웃 (세션 기반)",
     description="현재 로그인한 사용자의 세션을 만료시키고 로그아웃 처리합니다.",
+    request=None,
     responses={
         status.HTTP_200_OK: OpenApiResponse(description="로그아웃 성공"),
         status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="인증 실패 (로그인되지 않은 사용자)"),
@@ -93,6 +94,7 @@ def logout(request):
 @extend_schema(
     summary="로그인 상태 확인",
     description="현재 사용자가 로그인한 상태인지 확인합니다.",
+    request=None,
     responses={
         200: OpenApiResponse(description="로그인 상태 (세션 유지됨)"),
         401: OpenApiResponse(description="로그아웃 상태 또는 세션 만료"),
@@ -164,14 +166,17 @@ def password_reset_request(request):
         user.set_password(temp_password)
         user.save()
         # 3. 이메일 발송
-        send_mail(
-            subject='[Fread] 임시 비밀번호 안내',
-            message=f'안녕하세요. FREAD입니다.\n 임시 비밀번호는 다음과 같습니다: {temp_password}\n로그인 후 반드시 마이페이지에서 비밀번호를 변경해 주세요.',
-            from_email = settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email], # 이메일을 수신할 사람의 이메일 주소 목록
-            fail_silently=False, # 이메일 발송에 실패하면 SMTPException 오류 발생
-        )
-        return Response({'message': '임시 비밀번호가 이메일로 발송되었습니다. 로그인 후 비밀번호를 변경해 주세요.'}, status=status.HTTP_200_OK)
+        try:
+            send_mail(
+                subject='[Fread] 임시 비밀번호 안내',
+                message=f'안녕하세요. FREAD입니다.\n 임시 비밀번호는 다음과 같습니다: {temp_password}\n로그인 후 반드시 마이페이지에서 비밀번호를 변경해 주세요.',
+                from_email = settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email], # 이메일을 수신할 사람의 이메일 주소 목록
+                fail_silently=False, # 이메일 발송에 실패하면 SMTPException 오류 발생
+            )
+            return Response({'message': '임시 비밀번호가 이메일로 발송되었습니다. 로그인 후 비밀번호를 변경해 주세요.'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'detail': '이메일 발송 중 오류가 발생했습니다.'}, status=500)
     except User.DoesNotExist: # 이메일과 일치하는 user가 없다면
         return Response({'detail': '해당 이메일 주소로 등록된 사용자를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -202,6 +207,7 @@ def password_change(request):
     PUT: 현재 로그인한 사용자의 정보를 수정합니다 (이름, 장르, 작가 상태 등).
     DELETE: 현재 로그인한 사용자의 계정을 즉시 삭제합니다.
     """,
+    request=ProfileSerializer,
     responses={
         status.HTTP_200_OK: OpenApiResponse(description="내 정보 수정 성공 (수정 시)"),
         status.HTTP_204_NO_CONTENT: OpenApiResponse(description="회원 탈퇴 성공 (탈퇴 시)"),
@@ -218,5 +224,10 @@ def profile(request):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
         # 회원 탈퇴 전 정말로 탈퇴할 것인지 최종적으로 확인하는 알림 또는 팝업 구현하기 (프론트엔드)
-
+    
+    elif request.method == 'PUT':
+        serializer = ProfileSerializer(user, data=request.data, partial=True) # 부분 업데이트 허용
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
     
