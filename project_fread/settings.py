@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os 
 from dotenv import load_dotenv
-import environ
+# import environ
 
 # 프로젝트의 기본 경로 설정
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -90,6 +90,10 @@ SOCIALACCOUNT_PROVIDERS = {
         'PROCESS': 'login_on_get'
     }
 }
+
+# users\adapter.py의 CustomSocialAccountAdapter와 연결
+# is_social과 social_provider 필드를 설정하기 위해 추가함
+SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
 
 # 로그인/로그아웃 후 리디렉션 경로 설정
 LOGIN_REDIRECT_URL = '/'
