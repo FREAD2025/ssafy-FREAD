@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer, PasswordResetSerializer, PasswordChangeSerializer, ProfileSerializer
+from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer, PasswordResetSerializer, PasswordChangeSerializer, ProfileSerializer, MyPageSerializer
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from drf_spectacular.utils import extend_schema, OpenApiResponse # swagger
@@ -230,4 +230,19 @@ def profile(request):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+# 마이페이지 (/api/v1/users/mypage/)
+@extend_schema(
+    summary="마이페이지 정보 조회",
+    description="로그인한 사용자의 프로필 정보, 최근 분석 내역, 최근 찜한 공모전 내역을 조회합니다.",
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(response=MyPageSerializer, description="마이페이지 정보 조회 성공"),
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="인증되지 않은 사용자"),
+    },
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) # 로그인된 사용자만 접근 가능
+def mypage(request):
+    user = request.user
+    serializer = MyPageSerializer(user, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)

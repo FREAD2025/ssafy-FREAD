@@ -5,6 +5,10 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.validators import validate_email
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from analyses.serializers import SimpleAnalysisSerializer 
+from contests.serializers import SimpleContestSerializer
+
+
 
 User = get_user_model()
 
@@ -356,3 +360,70 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+# 
+class ReadOnlyProfileSerializer(serializers.ModelSerializer):
+    genres = GenreSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = ['username', 'email', 'name', 'profile_image', 'author_status', 'genres']
+        read_only_fields = ['username', 'email', 'name', 'profile_image', 'author_status', 'genres']
+
+# 마이페이지 : GET /api/v1/users/mypage/
+class MyPageSerializer(serializers.Serializer):
+    # 프로필 정보 (ProfileSerializer 재사용)
+    profile = ReadOnlyProfileSerializer(read_only=True)
+    # read_only=True 마이페이지에서는 보여주기만 할 것
+
+    # 최근 분석 내역 (analyses 앱의 Serializer 사용)
+    recent_analyses = serializers.SerializerMethodField()
+
+    # 최근 찜한 공모전 (contests 앱의 Serializer 사용)
+    recent_liked_contests = serializers.SerializerMethodField()
+
+    # 최근 분석 3건만 반환
+    def get_recent_analyses(self, obj):
+        # self: MyPageSerializer 객체
+        # obj: 전달 받은 모델 인스턴스
+        # 보통 현재 로그인한 User 모델의 인스턴스
+        # 예. views에서 serializer = MyPageSerializer(user)일 때 user
+        from analyses.models import Analysis  
+        # 현재 로그인한 사용자가 경험한 분석 내역 필터링
+        queryset = Analysis.objects.filter(user=obj).order_by('-created_at')[:8]
+        # 최근 분석 내역이 없으면 빈 쿼리셋 반환
+        return SimpleAnalysisSerializer(queryset, many=True).data
+        # 예시
+        """
+        analysis1 = Analysis(title="분석 1", created_at=datetime(2025, 5, 4, 3, 0, 0))
+        analysis2 = Analysis(title="분석 2", created_at=datetime(2025, 5, 4, 3, 10, 0))
+        queryset = [analysis1, analysis2]
+        """
+        # .data 예시
+        """
+        [
+            {'title': '분석 1', 'created_at': '2025-05-04T03:00:00Z'},
+            {'title': '분석 2', 'created_at': '2025-05-04T03:10:00Z'}
+        ]
+        """
+
+    # 찜한 공모전 3건만 반환
+    def get_recent_liked_contests(self, obj):
+        from contests.models import Contest  # 지연 import
+        queryset = obj.liked_contests.all().order_by('end_date')[:8] # 마감일이 가까운 순으로 공모전 정렬
+        return SimpleContestSerializer(queryset, many=True).data
+    
+"""
+다음 예시와 유사하게 구현 필요
+# analyses/serializers.py
+class SimpleAnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Analysis
+        fields = ['id', 'created_at', 'result_summary']  # 또는 title, summary 등 일부만
+
+# contests/serializers.py
+class SimpleContestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contest
+        fields = ['id', 'title', 'end_date']
+"""
