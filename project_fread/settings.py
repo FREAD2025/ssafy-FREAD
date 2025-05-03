@@ -197,7 +197,13 @@ AUTH_USER_MODEL = 'users.User'
 
 # 개발용 이메일 출력용 (콘솔)
 # Django의 send_mail() 같은 기능 또는 allauth의 비밀번호 초기화 기능을 사용하면 필요함
+# 실제 이메일 발송 시 SMTP 서버 설정으로 변경해야 함
+# 실제 이메일 발송 시 EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD 등 설정 필요
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# 기본 발신자 이메일 주소 설정
+DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
+# .env 파일 예시. EMAIL_HOST_USER=your_email@gmail.com
 
 # DRF 설정
 REST_FRAMEWORK = {
