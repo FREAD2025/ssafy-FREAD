@@ -2,7 +2,10 @@ from rest_framework import serializers
 from .models import Genre
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import validate_email
 from django.contrib.auth import authenticate
+from django.core.exceptions import ValidationError
+
 User = get_user_model()
 
 # 장르 (읽기 전용) : GET /api/v1/users/mypage/ , /api/v1/users/profile/
@@ -76,6 +79,18 @@ class SignupSerializer(serializers.ModelSerializer):
         # 예: blank=False는 Django의 ModelForm에서만 HTML <form> 기준으로 동작하고,
         # REST API 요청에서는 동작하지 않는다.
     
+    # username의 중복 확인 메서드
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists(): # 이미 해당 value와 동일한 username이 있다면
+            raise serializers.ValidationError("이미 사용 중인 아이디입니다.")
+        return value
+
+    # email의 중복 확인 메서드
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists(): # 이미 해당 value와 동일한 email이 있다면
+            raise serializers.ValidationError("이미 등록된 이메일 주소입니다.")
+        return value
+
     # 주력 장르의 선택 개수가 최대 3개 이내인지 확인하는 메서드
     # value 예시.
     """
@@ -151,13 +166,32 @@ class SocialExtraInfoSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = User
-        fields = ['name', 'genres', 'author_status', 'profile_image', 'email'] # 추가 작성할 필드 목록
+        fields = ['username', 'name', 'genres', 'author_status', 'profile_image', 'email'] # 추가 작성할 필드 목록
         extra_kwargs = {
             # 필수 필드
+            'username': {'required': True},
             'name': {'required': True},
             'author_status': {'required': True},
             'email': {'required': True},
         }
+    
+    # username의 중복 확인 메서드
+    # 중복되지 않도록 폼에서 수정할 수 있어야 함 (프론트엔드)
+    def validate_username(self, value):
+        if self.instance and self.instance.username and self.instance.username == value:
+            return value # 자기 자신의 기존 username은 허용
+        if User.objects.filter(username=value).exists(): # 이미 해당 value와 동일한 username이 있다면
+            raise serializers.ValidationError("이미 사용 중인 아이디입니다.")
+        return value
+
+    # email의 중복 확인 메서드
+    def validate_email(self, value):
+        if self.instance and self.instance.email and self.instance.email == value:
+            return value  # 자기 자신의 기존 email은 허용
+        if User.objects.filter(email=value).exists(): # 이미 해당 value와 동일한 email이 있다면
+            raise serializers.ValidationError("이미 등록된 이메일 주소입니다.")
+        return value
+    
     # 주력 장르 3개까지 선택 제한
     def validate_genres(self, value):
         if len(value) > 3:
@@ -261,3 +295,64 @@ class PasswordChangeSerializer(serializers.Serializer):
         # validated_data: self에 저장된 유효성 검사를 통과한 데이터
         user.save()
         return user # 변경된 사용자 객체 반환
+    
+# 프로필 수정 : PUT /api/v1/users/profile/
+class ProfileSerializer(serializers.ModelSerializer):
+    genres = serializers.PrimaryKeyRelatedField(
+        queryset=Genre.objects.all(),
+        many=True,
+        required=True,
+        help_text='선호하는 장르 ID 목록 (예: [1, 3, 5])'
+    )
+    class Meta:
+        model = get_user_model()
+        fields = [
+                    'username','email', 'name', 'phone_number', 
+                    'genres', 'author_status', 'profile_image'
+                ]        
+        # read_only_fields = 
+        extra_kwargs = {
+            'username': {'required': True, 'allow_blank': False},
+            'email': {'required': True, 'allow_blank': False},
+            'name': {'required': True, 'allow_blank': False},
+            'phone_number': {'required': False, 'allow_blank': True},
+            'author_status': {'required': True, 'allow_blank': False},
+            'profile_image': {'required': False, 'allow_null': True},
+        }
+    
+    # username 중복 확인
+    def validate_username(self, value):
+        if self.instance and self.instance.username == value:
+            return value  # 자기 자신의 기존 username은 허용
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("이미 사용 중인 아이디입니다.")
+        return value
+
+    # email 중복 확인
+    def validate_email(self, value):
+        # exclude로 자기 자신의 기존 email은 허용
+        if User.objects.filter(email=value).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError("이미 등록된 이메일 주소입니다.")
+        return value
+    
+    # 장르 선택 개수 유효성 검사 (최대 3개까지)
+    def validate_genres(self, value):
+        if len(value) > 3:
+            raise serializers.ValidationError("선호 장르는 최대 3개까지 선택할 수 있습니다.")
+        if not value:  # genres 필드가 비어있는지 확인
+            raise serializers.ValidationError("선호 장르를 하나 이상 선택해야 합니다.")
+        return value
+    
+    def update(self, instance, validated_data):
+
+        genres_data = validated_data.pop('genres', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if genres_data is not None:
+            instance.genres.set(genres_data) 
+
+        instance.save()
+
+        return instance
