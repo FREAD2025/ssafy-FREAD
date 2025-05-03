@@ -413,17 +413,3 @@ class MyPageSerializer(serializers.Serializer):
         queryset = obj.liked_contests.all().order_by('end_date')[:8] # 마감일이 가까운 순으로 공모전 정렬
         return SimpleContestSerializer(queryset, many=True).data
     
-"""
-다음 예시와 유사하게 구현 필요
-# analyses/serializers.py
-class SimpleAnalysisSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Analysis
-        fields = ['id', 'created_at', 'result_summary']  # 또는 title, summary 등 일부만
-
-# contests/serializers.py
-class SimpleContestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Contest
-        fields = ['id', 'title', 'end_date']
-"""

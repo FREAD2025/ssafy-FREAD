@@ -1,7 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer, PasswordResetSerializer, PasswordChangeSerializer, ProfileSerializer, MyPageSerializer
+from .serializers import (SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, 
+    FindIdSerializer, PasswordResetSerializer, PasswordChangeSerializer, ProfileSerializer, MyPageSerializer)
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from drf_spectacular.utils import extend_schema, OpenApiResponse # swagger
@@ -10,6 +11,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail # 이메일 발송
 from django.utils.crypto import get_random_string
 from django.conf import settings
+from contests.serializers import SimpleContestSerializer
 
 
 
@@ -152,7 +154,7 @@ def find_id(request):
     }
 )
 @api_view(['POST'])
-def password_reset_request(request):
+def reset_password(request):
     User = get_user_model() 
     serializer = PasswordResetSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -246,3 +248,59 @@ def mypage(request):
     user = request.user
     serializer = MyPageSerializer(user, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+# 찜한 공모전 목록 (/api/v1/users/liked-contests/)
+@extend_schema(
+    summary="찜한 공모전 목록 조회",
+    description="로그인한 사용자가 찜한 공모전 전체 목록을 반환합니다.",
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(
+            response=SimpleContestSerializer(many=True),
+            description="찜한 공모전 목록 조회 성공"
+        ),
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="인증되지 않은 사용자"),
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated]) # 로그인된 사용자만 접근 가능
+def liked_contests(request):
+    # 현재 사용자가 찜한 공모전 목록을 가져옵니다.
+    queryset = request.user.liked_contests.all().order_by('end_date') # 정렬 기준 확인 필요
+    # queryset 예시
+    """
+    queryset = [
+        Contest(id=12, title="제1회 청년 창작 공모전", end_date=date(2025, 5, 31)),
+        Contest(id=7, title="단편소설 신인상", end_date=date(2025, 6, 15)),
+    ]
+    """
+    serializer = SimpleContestSerializer(queryset, many=True, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
+    # serializer.data 예시
+    """
+    [
+        {
+            "id": 12,
+            "title": "제1회 청년 창작 공모전",
+            "end_date": "2025-05-31"
+        },
+        {
+            "id": 7,
+            "title": "단편소설 신인상",
+            "end_date": "2025-06-15"
+        }
+    ]
+    """
+"""
+다음 예시와 유사하게 다른 앱들에서 serializer 구현 필요
+# analyses/serializers.py
+class SimpleAnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Analysis
+        fields = ['id', 'created_at', 'result_summary']  # 또는 title, summary 등 일부만
+
+# contests/serializers.py
+class SimpleContestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contest
+        fields = ['id', 'title', 'end_date']
+"""
