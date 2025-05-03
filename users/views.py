@@ -151,7 +151,7 @@ def find_id(request):
 )
 @api_view(['POST'])
 def password_reset_request(request):
-    User = get_user_model()
+    User = get_user_model() 
     serializer = PasswordResetSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     email = serializer.validated_data['email'] # 유효성 검사를 통과한 validated_data에서 email 정보 가져오기
@@ -195,3 +195,28 @@ def password_change(request):
         serializer.save()
         return Response({'message': '비밀번호가 성공적으로 변경되었습니다.'}, status=status.HTTP_200_OK)
 
+# 회원 탈퇴 & 회원 정보 수정 (/api/v1/users/profile/)
+@extend_schema(
+    summary="내 정보 수정/회원 탈퇴",
+    description="""
+    PUT: 현재 로그인한 사용자의 정보를 수정합니다 (이름, 장르, 작가 상태 등).
+    DELETE: 현재 로그인한 사용자의 계정을 즉시 삭제합니다.
+    """,
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(description="내 정보 수정 성공 (수정 시)"),
+        status.HTTP_204_NO_CONTENT: OpenApiResponse(description="회원 탈퇴 성공 (탈퇴 시)"),
+        status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="잘못된 요청 데이터 (수정 시)"),
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="로그인되지 않은 사용자"),
+    }
+)
+@api_view(['PUT', 'DELETE'])
+@permission_classes([IsAuthenticated]) # 로그인한 사용자만 가능
+def profile(request):
+    user = request.user
+    if request.method == 'DELETE': # 회원 탈퇴
+        auth_logout(request) # 즉시 로그아웃(현재 활성 세션 종료)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+        # 회원 탈퇴 전 정말로 탈퇴할 것인지 최종적으로 확인하는 알림 또는 팝업 구현하기 (프론트엔드)
+
+    
