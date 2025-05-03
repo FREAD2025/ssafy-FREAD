@@ -120,6 +120,11 @@ class SignupSerializer(serializers.ModelSerializer):
         # 예. validated_data = {'username': 'test', 'email': 'test@example.com', 'password': '1234'}
         user = User.objects.create_user(**validated_data) # 새로운 인스턴스 생성 # 비밀번호는 해싱 후 저장됨
         user.genres.set(genres_data) # .set(genres_data) 메서드: mtm 필드에 주어진 리스트의 ID에 해당하는 Genre 객체들을 연결함
+        
+        # 일반 회원가입은 정보 입력이 끝났다면 바로 완료
+        user.is_profile_completed = True
+        user.save()
+
         return user
         # 예. print(user.genres.all())   # <QuerySet [<Genre: 판타지>, <Genre: SF/공상 과학>]>
         # user 인스턴스의 genres 예시
@@ -129,3 +134,54 @@ class SignupSerializer(serializers.ModelSerializer):
             { "id": 2, "name": "SF/공상 과학" }
             ]
         '''
+
+# 소셜 로그인 추가 정보 입력 : POST /api/v1/users/social/extra-info/)
+class SocialExtraInfoSerializer(serializers.ModelSerializer):
+    # 장르
+    genres = serializers.PrimaryKeyRelatedField(
+        queryset=Genre.objects.all(),
+        many=True,
+        required=True, 
+        help_text='선호하는 장르 (최대 3개)'
+    )
+    # 이미지
+    profile_image = serializers.ImageField(
+        required=False, 
+        allow_null=True
+    )
+    class Meta:
+        model = User
+        fields = ['name', 'genres', 'author_status', 'profile_image', 'email'] # 추가 작성할 필드 목록
+        extra_kwargs = {
+            # 필수 필드
+            'name': {'required': True},
+            'author_status': {'required': True},
+            'email': {'required': True},
+        }
+    # 주력 장르 3개까지 선택 제한
+    def validate_genres(self, value):
+        if len(value) > 3:
+            raise serializers.ValidationError("주력 장르는 최대 3개까지 선택할 수 있습니다.")
+        return value
+    # 현재 로그인된 사용자의 정보 업데이트
+    def update(self, instance, validated_data):
+        # instance 예시
+
+        # genres는 mtm 필드로 일반 필드와 같이 setattr()로 처리할 수 없고 따로 처리해야 함
+        genres_data = validated_data.pop('genres')
+
+        # validated_data에 남아있는 필드들을 순회하면서, 해당 값을 instance의 필드에 할당
+        for attr, value in validated_data.items():
+            # setattr(object, name, value): object의 name 속성에 value를 할당함
+            # 여기서는 instance (User 모델 인스턴스)의 속성(attr)에 validated_data의 값(value)을 할당함
+            # validated_data 예시. {'name': '새이름', 'author_status': '신인'},
+            setattr(instance, attr, value)
+            # 활용 예시. instance.name = '새이름'
+
+        # 장르 정보 업데이트
+        instance.genres.set(genres_data)
+        
+        # 프로필 작성이 완료되었음을 표시
+        instance.is_profile_completed = True
+        instance.save() # 변경된 내용을 데이터베이스에 저장합니다.
+        return instance # 업데이트된 User 모델 인스턴스를 반환합니다.
