@@ -1,12 +1,16 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer
+from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer, FindIdSerializer, PasswordResetSerializer
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from drf_spectacular.utils import extend_schema, OpenApiResponse # swagger
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail # 이메일 발송
+from django.utils.crypto import get_random_string
+from django.conf import settings
+
 
 
 # 회원 가입 (/api/v1/users/signup/)
@@ -133,3 +137,40 @@ def find_id(request):
         except User.DoesNotExist: # 제공된 email과 대응되는 user를 찾지 못했다면
             return Response({'detail': '해당 이메일 주소로 등록된 사용자를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) # 유효성 감사에 실패했다면 400 에러
+
+# 임시 비밀번호 이메일 발급 (/api/v1/users/reset-password/)
+@extend_schema(
+    summary="임시 비밀번호 발급",
+    description="제공된 이메일 주소와 일치하는 사용자를 찾아 임시 비밀번호를 생성하고 이메일로 발송합니다.",
+    request=PasswordResetSerializer,
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(description="임시 비밀번호 발송 성공, 이메일 발송됨"),
+        status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="유효하지 않은 요청 데이터"),
+        status.HTTP_404_NOT_FOUND: OpenApiResponse(description="해당 이메일 주소로 등록된 사용자 없음"),
+    }
+)
+@api_view(['POST'])
+def password_reset_request(request):
+    User = get_user_model()
+    serializer = PasswordResetSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.validated_data['email'] # 유효성 검사를 통과한 validated_data에서 email 정보 가져오기
+    try:
+        user = User.objects.get(email=email) # 해당 이메일과 대응되는 user 객체 반환
+        # 1. 임시 비밀번호 생성 (영문+숫자 10자리)
+        # get_random_string: 영문 대소문자 (a-zA-Z)와 숫자 (0-9)를 포함한 무작위 문자열 생성
+        temp_password = get_random_string(length=10)
+        # 2. 사용자의 비밀번호를 임시 비밀번호로 변경하고 저장
+        user.set_password(temp_password)
+        user.save()
+        # 3. 이메일 발송
+        send_mail(
+            subject='[Fread] 임시 비밀번호 안내',
+            message=f'안녕하세요. FREAD입니다.\n 임시 비밀번호는 다음과 같습니다: {temp_password}\n로그인 후 반드시 마이페이지에서 비밀번호를 변경해 주세요.',
+            from_email = settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email], # 이메일을 수신할 사람의 이메일 주소 목록
+            fail_silently=False, # 이메일 발송에 실패하면 SMTPException 오류 발생
+        )
+        return Response({'message': '임시 비밀번호가 이메일로 발송되었습니다. 로그인 후 비밀번호를 변경해 주세요.'}, status=status.HTTP_200_OK)
+    except User.DoesNotExist: # 이메일과 일치하는 user가 없다면
+        return Response({'detail': '해당 이메일 주소로 등록된 사용자를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)

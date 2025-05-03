@@ -208,3 +208,9 @@ class LoginSerializer(serializers.Serializer):
 class FindIdSerializer(serializers.Serializer):
     # 이메일 주소 입력받기
     email = serializers.EmailField(required=True, help_text="가입 시 사용한 이메일 주소를 입력하세요")
+
+# 임시 비밀번호 이메일 발송 : POST /api/v1/users/reset-password/
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True, help_text="가입 시 사용한 이메일 주소를 입력하세요")
+
+    
