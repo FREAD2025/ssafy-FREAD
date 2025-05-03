@@ -213,4 +213,51 @@ class FindIdSerializer(serializers.Serializer):
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, help_text="가입 시 사용한 이메일 주소를 입력하세요")
 
+# 비밀번호 변경 : POST /api/v1/users/password/change/
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'}, help_text="현재 비밀번호")
+    new_password1 = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'}, help_text="새 비밀번호(8자 이상)", validators=[validate_password])
+    # validate_password: django 기본 비밀번호 유효성 검사 함수
+    # settings.py에 설정된 AUTH_PASSWORD_VALIDATORS에 따라 비밀번호 검사
+    new_password2 = serializers.CharField(required=True, write_only=True, style={'input_type': 'password'}, help_text="새 비밀번호 확인")
+
+    # 특정 필드 수준 유효성 검사 (validate_<field_name> 메서드)
+    # old_password의 값만 인자(value)로 전달되어 유효성 검사 진행
+    # 기존 비밀번호가 실제 사용자의 비밀번호와 일치하는지 확인
+    def validate_old_password(self, value):
+        # self: serializer 인스턴스 자신
+        # value: 사용자가 폼이나 api로 입력한 값
+        # value 예시. "currentPassword123"
+        user = self.context['request'].user # 현재 로그인한 사용자
+        # context: drf에서는 뷰 함수에서 serializer를 호출(생성)할 때
+        # request 객체를 자동으로 context에 포함시키는 경우가 많음
+        # 예. serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+        if not user.check_password(value):
+            # check_password(): 주어진 비밀번호(value)가 사용자의 비밀번호와 일치하는지 확인
+            # 이전 비밀번호 value를 해싱해 db에 해싱된 비밀번호와 비교 -> True/False 반환
+            raise serializers.ValidationError("기존 비밀번호가 올바르지 않습니다.")
+        return value # 검증된 값(기존 비밀번호) 반환
     
+    # 객체 수준 유효성 검사 (validate 메서드)
+    # 모든 필드에 대한 유효성 검사가 완료된 후 전체 데이터를 대상으로 유효성 검사 진행
+    # 새로운 비밀번호 확인(new1과 new2가 일치하는지, 8자 이상인지)
+    def validate(self, data):
+        # data: 유효성 검사를 위해 전달된 모든 입력 필드 값들
+        # data 예시. OrderedDict([('old_password', 'currentPassword123'), ('new_password1', 'newSecurePassword!'), ('new_password2', 'newSecurePassword!')])
+        if data['new_password1'] != data['new_password2']:
+            raise serializers.ValidationError("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.")
+        return data
+
+    # 유효성 검사를 통과한 새 비밀번호 저장
+    # views에서 save() 호출 시 실행
+    def save(self, **kwargs):
+        # **kwargs: save() 메서드에서 인자로 전달된 값들
+        # 따로 views에서 따로 넘겨주지 않았다면 빈 딕셔너리
+        # 예. user = serializer.save(some_extra_info='value')로 넘겨받았다면
+        # kwargs= {'some_extra_info': 'value'} 
+        user = self.context['request'].user # 현재 로그인된 사용자 객체
+        user.set_password(self.validated_data['new_password1']) # 새 비밀번호를 암호화하여 저장
+        # user.set_password: 주어진 비밀번호를 해싱하여 db에 저장
+        # validated_data: self에 저장된 유효성 검사를 통과한 데이터
+        user.save()
+        return user # 변경된 사용자 객체 반환
