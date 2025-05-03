@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from .serializers import SignupSerializer, SocialExtraInfoSerializer, LoginSerializer
 from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from drf_spectacular.utils import extend_schema, OpenApiResponse # swagger
 from rest_framework.permissions import IsAuthenticated
 
@@ -67,7 +68,39 @@ def login(request):
         auth_login(request, user)
         return Response({'message': '로그인 성공', 'user': {'id': user.pk, 'username': user.username, 'email': user.email, 'name': user.name}}, status=status.HTTP_200_OK)
 
-# 로그아웃
+# 로그아웃 (/api/v1/users/logout/)
+@extend_schema(
+    summary="사용자 로그아웃 (세션 기반)",
+    description="현재 로그인한 사용자의 세션을 만료시키고 로그아웃 처리합니다.",
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(description="로그아웃 성공"),
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="인증 실패 (로그인되지 않은 사용자)"),
+    }
+)
 @api_view(['POST'])
+@permission_classes([IsAuthenticated]) # 로그인한 사용자만 가능
 def logout(request):
-    pass
+    auth_logout(request)
+    return Response({'message': '로그아웃 성공'}, status=status.HTTP_200_OK)
+
+# 세션 유지 확인 (/api/v1/users/session-check/)
+@extend_schema(
+    summary="로그인 상태 확인",
+    description="현재 사용자가 로그인한 상태인지 확인합니다.",
+    responses={
+        200: OpenApiResponse(description="로그인 상태 (세션 유지됨)"),
+        401: OpenApiResponse(description="로그아웃 상태 또는 세션 만료"),
+    }
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def session_check(request):
+    return Response({
+        "message": "현재 로그인된 상태입니다.",
+        "user": {
+            "id": request.user.id,
+            "username": request.user.username,
+            "name": request.user.name,
+            "email": request.user.email
+        }
+    }, status=200)
