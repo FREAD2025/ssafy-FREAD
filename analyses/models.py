@@ -12,9 +12,12 @@ class Analysis(models.Model):
     )
 
     # 분석 종류
+    FREAD = 'FREAD'
+    IMPROVMENT = 'IMPROVMENT'
+
     ANALYSIS_TYPE_CHOICES = [
-        ('FREAD', '프리드 분석'),   # 왼쪽:DB 저장값, 오른쪽:우리가 보는 값
-        ('IMPROVMENT', '문장 개선'),
+        (FREAD, '프리드 분석'),   # 왼쪽:DB 저장값, 오른쪽:우리가 보는 값
+        (IMPROVMENT, '문장 개선'),
     ]
     analysis_type = models.CharField(
         max_length=20,
