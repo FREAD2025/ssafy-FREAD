@@ -38,12 +38,6 @@ class Analysis(models.Model):
         verbose_name='원본 텍스트'
     )
 
-    # 원본 텍스트 글자수
-    word_count = models.IntegerField(
-        default=0,
-        verbose_name='글자 수 (공백 포함)'
-    )
-
     # 분석 생성 일시
     created_at = models.DateTimeField(
         auto_now_add=True,
