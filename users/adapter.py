@@ -3,6 +3,7 @@
 # is_social, social_provider를 설정하기 위해 추가함
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
+
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     # 소셜 로그인 직후 호출되는 함수
     # Django allauth가 새 유저를 생성한 후 실행됨
@@ -13,17 +14,21 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         user.social_provider = sociallogin.account.provider  # 'kakao'
         user.save()
         return user
-    
-    # 로그인 성공 후 유저 상태에 따라 리디렉션 
-    def authentication_success_url(self, request):
-        user = request.user
 
-        # 소셜 로그인 후, 아직 추가 정보를 입력하지 않은 경우
-        if not user.is_profile_completed:
-            return '/api/v1/users/social/extra-info/'  # 프론트에서 해당 경로로 라우팅하여 사용자에게 추가 입력 폼 보여주기
-        # 소셜 로그인 성공 후 리디렉션된 URL
-        return super().authentication_success_url(request) # settings.py의 LOGIN_REDIRECT_URL 참조 
-    
+    # (선택 사항) 카카오로부터 받은 username(닉네임)을 User 모델의 username으로 기본 설정
+    # 이 경우, 추가 정보 입력 시 사용자가 이 username을 확인/수정하게 됩니다.
+    # if sociallogin.account.provider == 'kakao':
+    #     kakao_data = sociallogin.account.extra_data
+    #     nickname = kakao_data.get('properties', {}).get('nickname')
+    #     if nickname and not user.username: # 기본 username이 없거나 비어있을 경우
+    #         # username 중복을 피하기 위한 간단한 처리 (실제로는 더 견고한 로직 필요)
+    #         # 예: nickname + provider_id[:4] 등
+    #         potential_username = nickname
+    #         # User 모델의 username 필드의 unique=True 제약조건을 고려해야 함
+    #         # 실제 구현 시 User.objects.filter(username=potential_username).exists() 체크 필요
+    #         user.username = potential_username # 이 부분은 중복 가능성 때문에 신중해야 함
+
+
 # settings.py에 설정 필요
 # SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
 
