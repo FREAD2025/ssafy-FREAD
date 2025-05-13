@@ -119,12 +119,13 @@ def contest_detail(request, contest_id):
         contest.delete()  # 데이터베이스에서 해당 공모전 삭제
         return Response(status=status.HTTP_204_NO_CONTENT)  # 성공적으로 삭제되었음을 알리는 204 No Content 응답 반환
 
-# --- 공모전 찜하기 (POST) / 찜 해제 (DELETE) ---
+# 공모전 찜하기/찜 해제 (/api/v1/contests/<int:contest_id>/like/)
 @extend_schema(
     summary="공모전 찜하기/찜 해제",
     description="""
     로그인한 사용자가 특정 공모전을 찜하거나 찜 해제합니다.
-    POST 요청으로 찜하고, DELETE 요청으로 찜 해제합니다.
+    POST : 찜
+    DELETE : 찜 해제
     """,
     responses={
         status.HTTP_200_OK: OpenApiResponse(description="찜하기 또는 찜 해제 성공"),
@@ -132,14 +133,14 @@ def contest_detail(request, contest_id):
         status.HTTP_404_NOT_FOUND: OpenApiResponse(description="공모전을 찾을 수 없습니다."),  # 해당 ID의 공모전이 없는 경우
     }
 )
-@api_view(['POST', 'DELETE'])  # 이 뷰는 POST (찜하기)와 DELETE (찜 해제) 요청을 처리합니다.
-@permission_classes([IsAuthenticated])  # 이 뷰는 로그인한 사용자만 접근 가능합니다.
+@api_view(['POST', 'DELETE'])  
+@permission_classes([IsAuthenticated])  # 로그인한 사용자만 접근 가능
 def like_contest(request, contest_id):
     contest = get_object_or_404(Contest, pk=contest_id)  # 찜/해제할 공모전을 찾고, 없으면 404 에러 반환
     user = request.user  # 현재 로그인한 사용자 정보 가져오기
 
+    # 찜하기
     if request.method == 'POST':
-        # POST 요청: 찜하기
         if user in contest.liked_users.all():  # 이미 사용자가 이 공모전을 찜했다면
             return Response({'detail': '이미 찜한 공모전입니다.'}, status=status.HTTP_400_BAD_REQUEST)  # 400 Bad Request 에러 반환
         contest.liked_users.add(user)  # 공모전의 'liked_users' (찜한 사용자들) 목록에 현재 사용자 추가
@@ -150,8 +151,8 @@ def like_contest(request, contest_id):
             'likes_count': likes_count
         }, status=status.HTTP_200_OK)  # 200 OK 응답과 함께 성공 메시지 반환
 
+    # 찜 해제
     elif request.method == 'DELETE':
-        # DELETE 요청: 찜 해제
         if user not in contest.liked_users.all():  # 사용자가 이 공모전을 찜하지 않았다면
             return Response({'detail': '찜하지 않은 공모전입니다.'}, status=status.HTTP_400_BAD_REQUEST)  # 400 Bad Request 에러 반환
         contest.liked_users.remove(user)  # 공모전의 'liked_users' 목록에서 현재 사용자 제거
@@ -161,10 +162,3 @@ def like_contest(request, contest_id):
             'message': '공모전 찜을 해제했습니다.',
             'likes_count': likes_count
         }, status=status.HTTP_200_OK)  # 200 OK 응답과 함께 성공 메시지 반환
-
-urlpatterns = [
-    # ... other urls
-    # path('', contest_list), # 필요하다면 URLConf에 추가
-    # path('<int:contest_id>/', contest_detail), # 필요하다면 URLConf에 추가
-    # path('<int:contest_id>/like/', like_contest), # 필요하다면 URLConf에 추가
-]
