@@ -84,13 +84,21 @@ def contest_list(request):
     GET : 특정 ID의 공모전 상세 정보 조회 (모든 사용자 가능)
     PUT,DELETE : 해당 공모전 정보를 수정하거나 삭제 (관리자만 가능)
     """,
-    responses={status.HTTP_200_OK: ContestSerializer},  
+    # responses={status.HTTP_200_OK: ContestSerializer}, 
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(response=ContestSerializer, description="요청 성공"),
+        status.HTTP_204_NO_CONTENT: OpenApiResponse(description="공모전 삭제 성공 (DELETE)"),
+        status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="잘못된 요청 데이터 (수정 시)"),
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="인증되지 않은 사용자"),
+        status.HTTP_403_FORBIDDEN: OpenApiResponse(description="권한이 없는 사용자 (관리자만 수정/삭제 가능)"),
+        status.HTTP_404_NOT_FOUND: OpenApiResponse(description="해당 공모전이 존재하지 않음"),
+    } 
 )
 @api_view(['GET', 'PUT', 'DELETE'])  
 def contest_detail(request, contest_id):
     contest = get_object_or_404(Contest, pk=contest_id)  # 주어진 ID의 공모전을 찾고, 없으면 404 에러 반환
 
-    # 공모전 상세 정보 조회
+    # 개별 공모전 상세 정보 조회
     if request.method == 'GET':
         serializer = ContestSerializer(contest, context={'request': request})  # 찾은 공모전 데이터를 JSON 형태로 변환
         return Response(serializer.data)  # JSON 데이터 반환
