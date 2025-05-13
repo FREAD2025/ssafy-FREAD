@@ -35,10 +35,6 @@ class ContestSerializer(serializers.ModelSerializer):
             "end_date": "2025-06-01",
             "target_audience":...,
             ...
-            "liked_users": [  # ManyToManyField (사용자 목록)
-                {"id": 1, "username": "juhee"},
-                {"id": 2, "username": "mike"}
-            ]
         }
         """
         request = self.context.get('request')
