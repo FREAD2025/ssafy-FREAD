@@ -16,7 +16,14 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse   # Swagger (AP
     GET : 전체 공모전 리스트를 조회합니다. (모든 사용자 가능)
     POST : 관리자만 새로운 공모전을 등록할 수 있습니다. (관리자 권한 필요)
     """,
-    responses={status.HTTP_200_OK: SimpleContestSerializer(many=True)},  # 성공 시 응답 데이터 형태
+    # responses={status.HTTP_200_OK: SimpleContestSerializer(many=True)},  # 성공 시 응답 데이터 형태
+    responses={
+        status.HTTP_200_OK: OpenApiResponse(response=SimpleContestSerializer(many=True), description="공모전 목록 조회 성공"),
+        status.HTTP_201_CREATED: OpenApiResponse(response=SimpleContestSerializer, description="공모전 등록 성공 (관리자 전용)"),
+        status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="잘못된 요청 데이터 (등록 시)"),
+        status.HTTP_403_FORBIDDEN: OpenApiResponse(description="권한이 없는 사용자 (관리자만 등록 가능)"),
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(description="인증되지 않은 사용자 (등록 시)"),
+    }
 )
 @api_view(['GET', 'POST'])  
 def contest_list(request):
