@@ -77,24 +77,3 @@ class SimpleContestSerializer(serializers.ModelSerializer):
     # 좋아요 수 계산
     def get_likes_count(self, obj):
         return obj.liked_users.count()  
-
-
-class LikedContestSerializer(serializers.ModelSerializer):
-    """
-    사용자가 '찜(like)'한 공모전 목록을 보여주기 위한 Serializer.
-    - GET /api/v1/users/liked-contests/ 에서 사용됩니다.
-    - 사용자가 찜한 공모전 목록을 조회할 때 사용되며, 공모전 정보와 함께 'is_liked' 필드를 항상 True로 반환합니다.
-    """
-    image = serializers.ImageField(use_url=True, read_only=True)
-    is_liked = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Contest
-        fields = [
-            'id', 'title', 'organizer', 'start_date', 'end_date',
-            'image', 'details_url', 'is_liked'
-        ]
-        read_only_fields = ['id', 'organizer', 'start_date', 'end_date', 'image', 'details_url', 'is_liked']
-
-    def get_is_liked(self, obj):
-        return True

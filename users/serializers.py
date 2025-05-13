@@ -361,7 +361,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         return instance
 
-# 
+
 class ReadOnlyProfileSerializer(serializers.ModelSerializer):
     genres = GenreSerializer(many=True, read_only=True)
 
