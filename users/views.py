@@ -12,6 +12,8 @@ from django.core.mail import send_mail # 이메일 발송
 from django.utils.crypto import get_random_string
 from django.conf import settings
 from contests.serializers import SimpleContestSerializer
+from rest_framework.pagination import PageNumberPagination
+
 
 
 
@@ -273,8 +275,13 @@ def liked_contests(request):
         Contest(id=7, title="단편소설 신인상", end_date=date(2025, 6, 15)),
     ]
     """
+    # paginator = PageNumberPagination()
+    # page = paginator.paginate_queryset(queryset, request)
+    # serializer = SimpleContestSerializer(page, many=True, context={'request': request})
     serializer = SimpleContestSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+    # return paginator.get_paginated_response(serializer.data)
+
     # serializer.data 예시
     """
     [
