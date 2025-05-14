@@ -63,7 +63,7 @@ def merge_content_tags(html_text):
         end_pos = end_content.start()
         middle_text = html_text[start_pos:end_pos]
 
-        # 중간의 <content> 태그 제거
+        # 중간의 중복된 <content> 태그 제거
         middle_text = re.sub(r"</?content>", "", middle_text)
 
         # 최종 결과 생성
@@ -96,19 +96,33 @@ def call_hanspell_spell_checker(original_text):
     }
     text_list = split_text_for_hanspell(original_text)
     # full_corrected_html_parts = []
-    for chunk in text_list:
-        try:
+
+    if not text_list: # 입력 텍스트가 비어있거나 공백만 있는 경우
+        return {
+            "corrected_text_plain": original_text,
+            "corrected_text_html": original_text.replace('\n', '<br>'), # 원본을 HTML 형식으로
+            "errors_count": 0,
+        }
+
+    try:
+        for chunk in text_list:
+            if not chunk.strip(): # 빈 청크는 continue
+                continue
+
             # spell_checker.check()는 (Checked 객체, 교정된 HTML 문자열) 튜플 반환
             # Checked 객체: original, checked, errors 등
             # html_output: 교정 부분이 <span> 태그로 감싸진 HTML
             check_result_tuple = spell_checker.check(chunk)
 
-            if not check_result_tuple or len(check_result_tuple) != 2:
+            if not check_result_tuple or len(check_result_tuple) != 2 or not hasattr(check_result_tuple[0], 'checked'):
+                # hasattr : 객체(check_result_tuple[0])가 'checked'라는 속성을 가지고 있는지 확인
+                
                 # hanspell이 정상적인 결과를 반환하지 못한 경우 (예: passportKey 문제)
-                print(f"spell_checker 처리 오류 (결과 없음): {chunk[:50]}...")
+                print(f"spell_checker 처리 오류 (결과 없음 또는 형식 오류): {chunk[:50]}...")
                 # HTML 출력을 위해 원본의 개행을 <br>로 변경
                 # full_corrected_html_parts.append(chunk.replace("\n", "<br>"))
-                continue  # 다음 청크로
+                raise Exception("Hanspell 청크 처리 중 오류 발생") # 루프 중단
+                # continue  # 다음 청크로
 
             now_result = check_result_tuple[0]  # Checked 객체
             now_html = check_result_tuple[1]  # 교정된 HTML 문자열
@@ -120,10 +134,7 @@ def call_hanspell_spell_checker(original_text):
             total_result["time"] += now_result.time
             total_result["html"] += now_html
 
-        except (
-            Exception
-        ) as e:  # 네이버 서비스 점검, passportKey 획득 실패, 네트워크 오류 등 다양한 예외 가능
-            print(f"맞춤법 검사 중 오류 발생 (call_hanspell_spell_checker): {str(e)}")
+        
 
         total_result["html"] = merge_content_tags(total_result["html"])
         print(total_result)
@@ -135,3 +146,6 @@ def call_hanspell_spell_checker(original_text):
 
         # 기능 정의서: "교정된 문장에 교정된 부분을 텍스트 색으로 표시"
         # -> `final_corrected_html`이 이 역할을 함
+    except Exception as e:  # 네이버 서비스 점검, passportKey 획득 실패, 네트워크 오류 등 다양한 예외 가능
+        print(f"맞춤법 검사 중 오류 발생 (call_hanspell_spell_checker): {str(e)}")
+        return None # 오류 발생 시 None 반환
