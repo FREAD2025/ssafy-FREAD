@@ -9,7 +9,6 @@ from analyses.serializers import AnalysisListSerializer
 from contests.serializers import SimpleContestSerializer
 
 
-
 User = get_user_model()
 
 # 장르 (읽기 전용) : GET /api/v1/users/mypage/ , /api/v1/users/profile/
