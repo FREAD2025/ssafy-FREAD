@@ -150,7 +150,7 @@ def generate_fread_analysis_score(original_text):
 
 # 최종 댓글들 50개 + 대표 댓글 5개 리턴
 def generate_fread_ai_comments(original_text):
-    # 최종 json 파일 형태
+    # 최종 json 데이터 형태
     grouped_ai_comments = {
         "10대": {"male": [], "female": []},
         "20대": {"male": [], "female": []},
@@ -176,9 +176,10 @@ def generate_fread_ai_comments(original_text):
                     
     # 대표 댓글 생성
     final_summary_comments = generate_final_summary_comments(only_contents)
+
     # 에러메시지(str)가 리턴됐다면
     if isinstance(final_summary_comments, str):
-        return final_summary_comments  # 분석 전체 중단하고 에러메시지 봔환
+        return final_summary_comments  # 분석 전체 중단하고 에러메시지 반환
     
     grouped_ai_comments["대표 댓글"] = final_summary_comments   # 최종적으로 grouped_ai_comments에 대표 댓글도 추가
 
@@ -233,15 +234,15 @@ def create_ai_comment_content(original_text, age, gender):
             temperature=0.5,
         )
 
-        list_response = response.choices[0].message.content.strip()
-        # print(list_response)
+        json_response = response.choices[0].message.content.strip()
+        # print(json_response)
 
-        data = json.loads(list_response)    # JSON 파싱 (JSON -> dict)
+        data = json.loads(json_response)    # JSON 파싱 (JSON -> dict)
         validated = CommentResponseModel(comments=data) # Pydantic 모델로 유효성 검사 및 구조화
-        return validated.comments   # dict 반환
+        return validated.comments   # list 반환
     
     except Exception as e:
-        print(f"GPT 댓글 생성 에러: {age}, {gender}", e)
+        print(f"GPT AI댓글 내용 생성 에러: {age}, {gender}", e)
         return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
  
 
@@ -294,22 +295,24 @@ def generate_final_summary_comments(contents):
             temperature=0.5,
         )
 
-        list_response = response.choices[0].message.content.strip()
-        # print(list_response)
+        json_response = response.choices[0].message.content.strip()
+        # print(json_response)
 
-        data = json.loads(list_response)    # JSON 파싱 (JSON -> dict)
+        data = json.loads(json_response)    # JSON 파싱 (JSON -> dict)
         validated = FinalCommentResponseModel(comments=data) # Pydantic 모델로 유효성 검사 및 구조화
-        return validated.comments   # dict 반환
+        return validated.comments   # list 반환
     
     except Exception as e:
         print("GPT 대표 댓글 생성 에러:", e)
         return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
 
 
+
+
 # 솔루션 생성 ===============================================================================================================
 def generate_fread_solutions(original_text):
     class SolutionResponseModel(BaseModel):
-        solutions: conlist(str, min_items=5, max_items=5)    # type: ignore # 문자열(댓글) 5개로 이루어진 리스트여야 함
+        solutions: conlist(str, min_items=3, max_items=3)    # type: ignore # 문자열(댓글) 5개로 이루어진 리스트여야 함
 
     prompt = original_text
 
@@ -321,28 +324,39 @@ def generate_fread_solutions(original_text):
                 {
                     "role": "system",
                     "content": f"""
-                        당신은 독자 50명의 댓글을 읽고, 핵심 반응을 5개의 대표 댓글로 요약하여 JSON 형식으로 반환하는 AI입니다.
+                        당신은 경험 많은 소설 편집자이자 글쓰기 코치입니다. 
 
-                        - 댓글을 창조하는 것이 아닌, 기존 댓글들을 분석하여 요약을 해야 합니다.
-                        - 기존의 댓글과 내용이 완전히 일치해서는 안됩니다. 
-                        - 현실적인 한국인이 작성할 만한 어투와, 내용이어야 합니다.
-                        - 각 댓글은 한 줄이며, 이모티콘을 포함해야 합니다.
-                        - 댓글은 문장 하나로 끝내야 하며, 너무 짧지도 길지도 않아야 합니다.
+                        당신의 역할은 소설 한 편을 읽고, 해당 소설의 완성도를 높일 수 있는 솔루션을 제시하는 것입니다. 
+
+                        솔루션은 아래 기준을 정확히 따릅니다:
+                        - 총 3개의 솔루션을 제시합니다.
+                        - 각 솔루션은 150자 이내로 간결하게 작성합니다.
+                        - 각 솔루션은 명확하고 실용적이어야 하며, 구체적인 예시를 포함합니다. 
+                        - 솔루션은 독자가 소설을 더 잘 이해하고 몰입할 수 있도록 돕는 방향으로 작성합니다. 
+                        - 아래는 참고할 수 있는 예시일 뿐, 반드시 이 형식으로 작성할 필요는 없습니다.
+
+                        예:
+                        - "맞춤법을 더 신경 써 주세요. 예: '아름다워요' → '아름다워요.'"
+                        - "캐릭터의 감정을 더 구체적으로 표현해 보세요. 예: '슬펐다' → '눈물이 맺혔다.'"
+                        - "배경 묘사를 더 생동감 있게 추가해 보세요. 예: '밤하늘이 어두웠다' → '별빛이 희미하게 반짝였다.'"
+
+                        프롬포트로 전달되는 소설 한 편을 읽고, 이 기준에 맞는 솔루션을 제시하세요.
+                        당신은 소설 한 편을 읽고 그 한 편의 소설에 대한 솔루션을 제공하는 
+
 
                         📥 반드시 아래 JSON 형식으로만 응답하세요:
 
                         {{
-                            "comments": [
-                                "아니 진짜 웃기긴 한데 주인공 좀 답답함🤔",
-                                "뭔가 작가님이 하신 남주 묘사 보면 엄청 잘생겼을거같지 않음??😍",
-                                ...
+                            solutions:[
+                                "맞춤법을 더 신경 써 주세요. 예: '그녀는 맛있는것을 좋아하게 돼었다.' → '그녀는 맛있는 것을 좋아하게 되었다.'",
+                                "캐릭터의 감정을 더 구체적으로 표현해 보세요. 예: '슬펐다' → '눈물이 맺혔다.'",
+                                "배경 묘사를 더 생동감 있게 추가해 보세요. 예: '밤하늘이 어두웠다' → '별빛이 희미하게 반짝였다.'"
                             ]
                         }}
 
                         🛑 **중요 제약 조건**:
 
-                        - **댓글은 반드시 5개여야 하며**, 4개 또는 6개는 절대 허용되지 않습니다.
-                        - 현실적인 한국인이 작성할 만한 어투와, 내용이어야 합니다.
+                        - **솔루션은 반드시 3개여야 하며**, 2개 또는 4개는 절대 허용되지 않습니다.
                         - **null, 빈 문자열, 생략된 key**는 절대 허용되지 않습니다.
                         - 시스템은 응답을 파싱하여 자동 처리하므로, 위 조건을 어기면 서비스가 실패합니다.
                     """
@@ -353,13 +367,13 @@ def generate_fread_solutions(original_text):
             temperature=0.5,
         )
 
-        list_response = response.choices[0].message.content.strip()
-        # print(list_response)
+        json_response = response.choices[0].message.content.strip()
+        # print(json_response)
 
-        data = json.loads(list_response)    # JSON 파싱 (JSON -> dict)
-        validated = FinalCommentResponseModel(comments=data) # Pydantic 모델로 유효성 검사 및 구조화
-        return validated.comments   # dict 반환
+        data = json.loads(json_response)    # JSON 파싱 (JSON -> dict)
+        validated = SolutionResponseModel(solutions=data) # Pydantic 모델로 유효성 검사 및 구조화
+        return validated.solutions   # list 반환
     
     except Exception as e:
-        print("GPT 대표 댓글 생성 에러:", e)
+        print("GPT 솔루션 생성 에러:", e)
         return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
