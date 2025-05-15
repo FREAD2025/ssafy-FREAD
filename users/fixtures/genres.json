@@ -1,0 +1,44 @@
+[
+{
+    "model": "users.genre",
+    "pk": 1,
+    "fields": {
+        "name": "로맨스"
+    }
+},
+{
+    "model": "users.genre",
+    "pk": 2,
+    "fields": {
+        "name": "판타지"
+    }
+},
+{
+    "model": "users.genre",
+    "pk": 3,
+    "fields": {
+        "name": "SF/공상과학"
+    }
+},
+{
+    "model": "users.genre",
+    "pk": 4,
+    "fields": {
+        "name": "미스테리/스릴러"
+    }
+},
+{
+    "model": "users.genre",
+    "pk": 5,
+    "fields": {
+        "name": "에세이"
+    }
+},
+{
+    "model": "users.genre",
+    "pk": 6,
+    "fields": {
+        "name": "시"
+    }
+}
+]
