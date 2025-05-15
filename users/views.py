@@ -14,6 +14,8 @@ from django.conf import settings
 from contests.serializers import SimpleContestSerializer
 from rest_framework.pagination import PageNumberPagination
 
+from django.contrib.auth import authenticate
+
 
 
 
@@ -32,8 +34,23 @@ def signup(request):
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
         user = serializer.save() # user 인스턴스 생성
-        auth_login(request, user)  # 자동 로그인 처리
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # auth_login(request, user)  # 자동 로그인 처리
+        # 방금 생성한 사용자 자격 증명으로 다시 인증
+        user = authenticate(
+            request,
+            username=user.username,
+            password=request.data['password']
+        )
+        # authenticate 가 None 을 반환하지 않는지 확인
+        if user is None:
+            return Response({'detail': '자동 로그인에 실패했습니다.'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # login. backend 정보가 user.backend 에 들어있음
+        auth_login(request, user)
+        return Response(SignupSerializer(user).data,
+                        status=status.HTTP_201_CREATED)
+        # return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # 소셜 로그인 추가 정보 입력 (/api/v1/users/social/extra-info/)
 @extend_schema(
