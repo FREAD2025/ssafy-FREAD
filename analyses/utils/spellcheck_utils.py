@@ -4,7 +4,7 @@ from analyses.hanspell import spell_checker  # 경로 확인 필요!
 
 # 프로젝트 구조에 따라 from ..hanspell import spell_checker 가 될 수도 있음
 
-from hanspell.constants import CheckResult
+from analyses.hanspell.constants import CheckResult
 import re
 import json
 

@@ -5,9 +5,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.validators import validate_email
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
-from analyses.serializers import SimpleAnalysisSerializer 
+from analyses.serializers import AnalysisListSerializer 
 from contests.serializers import SimpleContestSerializer
-
 
 
 User = get_user_model()
@@ -392,7 +391,7 @@ class MyPageSerializer(serializers.Serializer):
         # 현재 로그인한 사용자가 경험한 분석 내역 필터링
         queryset = Analysis.objects.filter(user=obj).order_by('-created_at')[:8]
         # 최근 분석 내역이 없으면 빈 쿼리셋 반환
-        return SimpleAnalysisSerializer(queryset, many=True).data
+        return AnalysisListSerializer(queryset, many=True).data
         # 예시
         """
         analysis1 = Analysis(title="분석 1", created_at=datetime(2025, 5, 4, 3, 0, 0))

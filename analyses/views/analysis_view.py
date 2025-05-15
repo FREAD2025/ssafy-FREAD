@@ -6,8 +6,8 @@ from rest_framework import status
 
 # import asyncio
 
-from ..models import Analysis, FreadAnalysis, SentenceAnalysis
-from ..serializers import AnalysisCreateSerializer, AnalysisListSerializer, FreadAnalysisSerializer, SentenceAnalysisSerializer, GrammerCheckCreateSerializer, GrammerCheckSerializer
+from ..models import Analysis, FreadAnalysis
+from ..serializers import AnalysisCreateSerializer, AnalysisListSerializer, FreadAnalysisSerializer
 from ..utils.generate_fread_analysis import generate_fread_analysis_score, generate_fread_ai_comments, generate_fread_solutions
 from ..utils.generate_analysis import generate_title_from_gpt
 
