@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Analysis, FreadAnalysis, SentenceAnalysis
-from .utils.generate_analysis import generate_title_from_gpt
+from .models import Analysis, FreadAnalysis
+# from .utils.generate_analysis import generate_title_from_gpt
 
 # 특정 유저의 통합분석내역 전체 리스트 (GET)
 class AnalysisListSerializer(serializers.ModelSerializer):
@@ -55,11 +55,11 @@ class FreadAnalysisSerializer(serializers.ModelSerializer):
 
 
 
-# 문장 개선 결과 (GET)
-class SentenceAnalysisSerializer(serializers.ModelSerializer):
-   class Meta:
-        model = SentenceAnalysis
-        fields = ('sentences_to_fix', 'suggestions_and_result', 'improved_full_text', 'final_word_count',)
+# # 문장 개선 결과 (GET)
+# class SentenceAnalysisSerializer(serializers.ModelSerializer):
+#    class Meta:
+#         model = SentenceAnalysis
+#         fields = ('sentences_to_fix', 'suggestions_and_result', 'improved_full_text', 'final_word_count',)
 
 
 

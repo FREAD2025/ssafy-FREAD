@@ -83,25 +83,25 @@ class FreadAnalysis(models.Model):
 
 
 
-class SentenceAnalysis(models.Model):
-    # PK
-    # 통합 분석 모델의 pk를 공유해서 사용한다. 
-    analysis_id = models.OneToOneField(
-        Analysis,
-        on_delete=models.CASCADE,
-        primary_key=True,
-        related_name='analysis_result',
-        verbose_name='연결된 통합 분석'
-    )
+# class SentenceAnalysis(models.Model):
+#     # PK
+#     # 통합 분석 모델의 pk를 공유해서 사용한다. 
+#     analysis_id = models.OneToOneField(
+#         Analysis,
+#         on_delete=models.CASCADE,
+#         primary_key=True,
+#         related_name='analysis_result',
+#         verbose_name='연결된 통합 분석'
+#     )
 
-    sentences_to_fix = models.JSONField(verbose_name='개선 필요 문장 정보 (JSON)')
-    suggestions_and_result = models.JSONField(verbose_name='개선 제안 및 결과 (JSON)')
-    improved_full_text = models.TextField(verbose_name='개선 완료된 전문')
-    final_word_count = models.IntegerField(verbose_name='최종 글자 수 (공백 포함)')
+#     sentences_to_fix = models.JSONField(verbose_name='개선 필요 문장 정보 (JSON)')
+#     suggestions_and_result = models.JSONField(verbose_name='개선 제안 및 결과 (JSON)')
+#     improved_full_text = models.TextField(verbose_name='개선 완료된 전문')
+#     final_word_count = models.IntegerField(verbose_name='최종 글자 수 (공백 포함)')
 
-    def __str__(self):
-        return f"문장 개선 결과 (분석 ID: {self.analysis_id})"
+#     def __str__(self):
+#         return f"문장 개선 결과 (분석 ID: {self.analysis_id})"
 
-    class Meta:
-        verbose_name = '문장 개선 결과'
-        verbose_name_plural = '문장 개선 결과 목록'
+#     class Meta:
+#         verbose_name = '문장 개선 결과'
+#         verbose_name_plural = '문장 개선 결과 목록'
