@@ -10,4 +10,3 @@ urlpatterns = [
     # path('sentence/<int:analysis_id>/', views, name='문장 개선 결과'),
     path('spellcheck/', spell_check_view.spellcheck, name='맞춤법 검사'),
 ]
-
