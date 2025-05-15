@@ -25,24 +25,20 @@ class AnalysisCreateSerializer(serializers.ModelSerializer):
 
         return data
 
-    def create(self, validated_data):
+    def create(self, validated_data):   # 위의 validate 함수의 결과 데이터가 validated_data로 넘어옴
         # 분석 요청한 user 가져오기
         user = self.context['request'].user
 
         # 사용자가 입력한 텍스트 가져오기
         original_text = validated_data.get('original_text')
 
-        # GPT를 통해 제목 생성
-        title = generate_title_from_gpt(original_text)
-
         # 분석 종류 명시
         analysis_type = Analysis.FREAD
 
-        # Analysis 객체 생성
-        analysis = Analysis.objects.create(
+        # Analysis 객체 생성 (title은 나중에 설정)
+        analysis = Analysis(
             user=user,
             analysis_type=analysis_type,
-            title=title,
             original_text=original_text,
         )
 
@@ -68,32 +64,23 @@ class SentenceAnalysisSerializer(serializers.ModelSerializer):
 
 
 
-# 맞춤법 검사 생성 (POST)
-class GrammerCheckCreateSerializer(serializers.Serializer):
+# 맞춤법 검사 요청 : (POST) /api/v1/analyses/spellcheck/
+class SpellCheckRequestSerializer(serializers.Serializer):
     original_text = serializers.CharField(
-        max_length=5000,
+        max_length=5000, 
         required=True,
-        allow_blank=False,
-        help_text='검사할 텍스트 (최대 5000자)'
+        allow_blank=False, 
+        help_text='검사할 원본 텍스트 (최대 5000자)'
     )
 
 
 
 
-# 맞춤법 검사 결과 (GET)
-class GrammerCheckSerializer(serializers.Serializer):
-    sentences_to_fix = serializers.JSONField(
-        max_length=5000,
-        required=True,
-        allow_blank=False,
-        help_text='교정 필요 문장 정보 (JSON)')
-    
-    word_count = serializers.IntegerField(help_text='글자 수 (공백 포함)')
-    
-    improved_full_text = serializers.CharField(
-        max_length=6000,
-        required=True,
-        allow_blank=False,
-        help_text='교정 완료된 전문')
-    
-    final_word_count = serializers.IntegerField(help_text='최종 글자 수 (공백 포함)')
+# 맞춤법 검사 결과 응답 : (GET) /api/v1/analyses/spellcheck/
+class SpellCheckResponseSerializer(serializers.Serializer):
+    original_text = serializers.CharField(help_text="사용자가 입력한 원본 텍스트")
+    corrected_text_plain = serializers.CharField(help_text="맞춤법 교정이 완료된 일반 텍스트")
+    corrected_text_html = serializers.CharField(help_text="교정 부분이 HTML 태그(span)로 하이라이트된 텍스트")
+    errors_count = serializers.IntegerField(help_text="발견된 총 오류 개수")
+    original_word_count_with_spaces = serializers.IntegerField(help_text='원본 글자 수 (공백 포함)')
+    corrected_word_count_with_spaces = serializers.IntegerField(help_text='교정 후 글자 수 (공백 포함)')
