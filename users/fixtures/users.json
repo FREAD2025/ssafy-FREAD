@@ -1,0 +1,82 @@
+[
+{
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$600000$Gc01PWdjKe4mesJxY0Apso$dc7qFTGO6bbgo4cfwxZauHpjOeFnncLWopd50K/ioN0=",
+        "last_login": "2025-05-15T10:08:40.914Z",
+        "is_superuser": true,
+        "username": "admin",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2025-05-15T10:08:08.359Z",
+        "email": "osrosr888@naver.com",
+        "name": "",
+        "phone_number": "",
+        "author_status": "",
+        "profile_image": "",
+        "is_social": false,
+        "social_provider": "kakao",
+        "is_profile_completed": false,
+        "groups": [],
+        "user_permissions": [],
+        "genres": [],
+        "liked_contests": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+        "password": "1234",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "oesara",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-05-15T10:11:31.859Z",
+        "email": "abcd@naver.com",
+        "name": "페르시안 고양이",
+        "phone_number": "",
+        "author_status": "hobbyist",
+        "profile_image": "",
+        "is_social": false,
+        "social_provider": "kakao",
+        "is_profile_completed": false,
+        "groups": [],
+        "user_permissions": [],
+        "genres": [
+            1
+        ],
+        "liked_contests": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+        "password": "1234",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "pj",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-05-15T10:18:31.243Z",
+        "email": "pj123@naver.com",
+        "name": "pj",
+        "phone_number": "",
+        "author_status": "hobbyist",
+        "profile_image": "",
+        "is_social": false,
+        "social_provider": "kakao",
+        "is_profile_completed": false,
+        "groups": [],
+        "user_permissions": [],
+        "genres": [
+            3,
+            4
+        ],
+        "liked_contests": []
+    }
+}
+]
