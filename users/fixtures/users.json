@@ -3,14 +3,14 @@
     "model": "users.user",
     "pk": 1,
     "fields": {
-        "password": "pbkdf2_sha256$600000$Gc01PWdjKe4mesJxY0Apso$dc7qFTGO6bbgo4cfwxZauHpjOeFnncLWopd50K/ioN0=",
-        "last_login": "2025-05-15T10:08:40.914Z",
+        "password": "pbkdf2_sha256$600000$0lrPEkHZoGzV3AslhI2QPj$lMyJNBVlK6bs0MoGnfwMOsJJZdqBxslLFvIHl/C62ZE=",
+        "last_login": null,
         "is_superuser": true,
         "username": "admin",
         "is_staff": true,
         "is_active": true,
-        "date_joined": "2025-05-15T10:08:08.359Z",
-        "email": "osrosr888@naver.com",
+        "date_joined": "2025-05-16T05:54:39.222Z",
+        "email": "admin@naver.com",
         "name": "",
         "phone_number": "",
         "author_status": "",
@@ -28,25 +28,25 @@
     "model": "users.user",
     "pk": 2,
     "fields": {
-        "password": "1234",
-        "last_login": null,
+        "password": "pbkdf2_sha256$600000$W1vCQrk405prpV3zefPCVx$vNwJnkTS+bvrilcAiZnmn8zHN0IB2K3z0J5pWOPfYLA=",
+        "last_login": "2025-05-16T05:56:55.192Z",
         "is_superuser": false,
-        "username": "oesara",
+        "username": "user1",
         "is_staff": false,
         "is_active": true,
-        "date_joined": "2025-05-15T10:11:31.859Z",
-        "email": "abcd@naver.com",
-        "name": "os",
+        "date_joined": "2025-05-16T05:56:54.543Z",
+        "email": "user1@naver.com",
+        "name": "username1",
         "phone_number": "",
-        "author_status": "hobbyist",
+        "author_status": "none",
         "profile_image": "",
         "is_social": false,
         "social_provider": "kakao",
-        "is_profile_completed": false,
+        "is_profile_completed": true,
         "groups": [],
         "user_permissions": [],
         "genres": [
-            1
+            2
         ],
         "liked_contests": []
     }
@@ -55,26 +55,109 @@
     "model": "users.user",
     "pk": 3,
     "fields": {
-        "password": "1234",
-        "last_login": null,
+        "password": "pbkdf2_sha256$600000$Yhc7ALRVtS2ZsB3kyTLSSQ$CaruaZ2vi6ag701po7GrHQJoXPkuOH4JsI/yzcK8r/M=",
+        "last_login": "2025-05-16T05:58:07.092Z",
         "is_superuser": false,
-        "username": "pj",
+        "username": "user2",
         "is_staff": false,
         "is_active": true,
-        "date_joined": "2025-05-15T10:18:31.243Z",
-        "email": "pj123@naver.com",
-        "name": "pj",
-        "phone_number": "",
-        "author_status": "hobbyist",
+        "date_joined": "2025-05-16T05:58:06.464Z",
+        "email": "user2@naver.com",
+        "name": "username2",
+        "phone_number": "010-1234-1234",
+        "author_status": "aspiring",
         "profile_image": "",
         "is_social": false,
         "social_provider": "kakao",
-        "is_profile_completed": false,
+        "is_profile_completed": true,
         "groups": [],
         "user_permissions": [],
         "genres": [
             3,
-            4
+            1
+        ],
+        "liked_contests": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+        "password": "pbkdf2_sha256$600000$J73xw5WodfEa9u2EydO35T$WusWr7viv5Aztm9LR82h+1H+nm4GgDyOaysbqfpOEHM=",
+        "last_login": "2025-05-16T05:59:20.953Z",
+        "is_superuser": false,
+        "username": "user3",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-05-16T05:59:19.946Z",
+        "email": "user3@naver.com",
+        "name": "username3",
+        "phone_number": "010-1234-1234",
+        "author_status": "hobbyist",
+        "profile_image": "",
+        "is_social": false,
+        "social_provider": "kakao",
+        "is_profile_completed": true,
+        "groups": [],
+        "user_permissions": [],
+        "genres": [
+            3,
+            5,
+            1
+        ],
+        "liked_contests": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 5,
+    "fields": {
+        "password": "pbkdf2_sha256$600000$IPQDHTsHfd6Bx1iZgUjgAs$0PWfrrB6tjl2BXwjr4j+kHJ55Lo5h7wfodked7Y39e8=",
+        "last_login": "2025-05-16T06:06:19.006Z",
+        "is_superuser": false,
+        "username": "user4",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-05-16T06:06:18.356Z",
+        "email": "user4@naver.com",
+        "name": "username4",
+        "phone_number": "010-1234-1234",
+        "author_status": "semi_pro",
+        "profile_image": "profile_pics/고양이_이미지_1.jpeg",
+        "is_social": false,
+        "social_provider": "kakao",
+        "is_profile_completed": true,
+        "groups": [],
+        "user_permissions": [],
+        "genres": [
+            6
+        ],
+        "liked_contests": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 6,
+    "fields": {
+        "password": "pbkdf2_sha256$600000$pDnLqZQWmZlWtjlOMpp0UF$1Dy83K+0V6Du/I01SA5rzjPWQWaHARxCouJocjI22uE=",
+        "last_login": "2025-05-16T06:08:04.559Z",
+        "is_superuser": false,
+        "username": "user5",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2025-05-16T06:08:03.913Z",
+        "email": "user5@naver.com",
+        "name": "username5",
+        "phone_number": "",
+        "author_status": "professional",
+        "profile_image": "profile_pics/고양이_사진_2.png",
+        "is_social": false,
+        "social_provider": "kakao",
+        "is_profile_completed": true,
+        "groups": [],
+        "user_permissions": [],
+        "genres": [
+            6
         ],
         "liked_contests": []
     }
