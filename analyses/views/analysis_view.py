@@ -53,10 +53,10 @@ class FreadAnalysisView(APIView):
 
         # gpt가 점수 데이터를 잘 생성했다면, 아까 미뤄뒀던 통합 분석 내역 (analysis)의 title 생성 (점수 데이터를 이용)
         title = generate_title_from_gpt(original_text[:300], score_data)
-        
-        # Analysis 객체의 제목 업데이트
-        analysis.title = title
-        analysis.save()  # 최종 저장
+
+        # 만약 GPT가 title을 잘 못 생성했다면
+        if isinstance(title, str): 
+            return Response({'error_message': title}, status=status.HTTP_400_BAD_REQUEST)  # 넘어온 문자열(에러메시지)을 클라에게 반환
 
 
         # GPT ai_comments 생성 (fread analysis)
@@ -78,7 +78,7 @@ class FreadAnalysisView(APIView):
 
         # 모든 데이터가 잘 생성됐다면 (fread analysis)
         FreadAnalysis.objects.create(
-            analysis = analysis,  # OneToOneField 연결
+            analysis_id = analysis,  # OneToOneField 연결
             total = score_data.total,
             logic = score_data.logic,
             appeal = score_data.appeal,
@@ -87,8 +87,15 @@ class FreadAnalysisView(APIView):
             popularity = score_data.popularity,
             ai_comments_data = ai_comments,
             solutions_data = solutions_data,
-)
+        )
+        
+        # Analysis 객체의 제목 업데이트
+        analysis.title = title.title    # 얘는 Pydantic 인스턴스로 넘어왔으므로, title까지 해줘야 접근 가능능
+        analysis.save()  # 최종 저장
+        
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    
 
 
 # # 문장 개선

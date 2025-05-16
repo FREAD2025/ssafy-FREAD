@@ -4,7 +4,8 @@ import requests
 import openai
 from pathlib import Path
 from django.conf import settings
-from pydantic import BaseModel, conlist, Field  # 데이터 유효성검사 + 자동 타입 변환
+from pydantic import BaseModel, Field, model_validator  # 데이터 유효성검사 + 자동 타입 변환
+from typing import List
 
 
 
@@ -114,14 +115,26 @@ def generate_fread_analysis_score(original_text):
         )
 
         json_response = response.choices[0].message.content.strip()
-        # print(json_response)
+        print(f'fread - 분야별 점수 : {json_response}')
 
-        data = json.loads(json_response)    # JSON 파싱 (JSON -> dict)
-        validated = FreadAnalysisCriteria(**data)  # Pydantic 모델로 유효성 검사 및 구조화
-        return validated
+    
+        # JSON 파싱 (JSON -> dict)
+        try:    # JSON 으로 잘 들어왔는지 확인
+            data = json.loads(json_response) 
+        except json.JSONDecodeError:
+            print("GPT 응답 (fread - 분야별 점수) 이 JSON 형식이 아님:", json_response)
+            return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."   
+        
+        # Pydantic 모델로 유효성 검사
+        try:
+            validated = FreadAnalysisCriteria(**data) 
+            return validated   # Pydantic 인스턴스 반환
+        except ValueError as e:
+            print("Pydantic 유효성 검사 (fread - 분야별 점수) 실패:", e)
+            return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
     
     except Exception as e:
-        print("GPT 분석 점수 생성 에러:", e)
+        print("GPT fread analysis 분야별 점수 생성 에러:", e)
         return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
     
 
@@ -175,7 +188,8 @@ def generate_fread_ai_comments(original_text):
                 only_contents.append(content)   # 대표 댓글 생성을 위해 댓글 내용만 따로 빼서 모으기
                     
     # 대표 댓글 생성
-    final_summary_comments = generate_final_summary_comments(only_contents)
+    only_contents_str = "\n".join(map(str, only_contents))
+    final_summary_comments = generate_final_summary_comments(only_contents_str)
 
     # 에러메시지(str)가 리턴됐다면
     if isinstance(final_summary_comments, str):
@@ -188,10 +202,19 @@ def generate_fread_ai_comments(original_text):
 
 
 
-# 댓글 내용 생성 (gpt 호출)
+# 연령/성별 댓글 내용 생성 (gpt 호출)
 def create_ai_comment_content(original_text, age, gender):
     class CommentResponseModel(BaseModel):
-        comments: conlist(str, min_items=5, max_items=5)    # type: ignore # 문자열(댓글) 5개로 이루어진 리스트여야 함
+        comments: List[str] = Field(..., description="댓글은 5개의 문자열로 구성된 리스트여야 합니다.")
+
+        @model_validator(mode="before")
+        def validate_comments(cls, values):
+            comments = values.get("comments")
+            if not isinstance(comments, list):
+                raise ValueError("comments는 리스트여야 합니다.")
+            if len(comments) != 5:
+                raise ValueError("댓글은 정확히 5개여야 합니다.")
+            return values
 
     prompt = original_text
 
@@ -205,6 +228,9 @@ def create_ai_comment_content(original_text, age, gender):
                     "content": f"""
                         당신은 {age}대 {gender} 독자 5명이 소설 한 편을 읽은 후 남길 실제 댓글을 생성하여 JSON 형식으로 반환하는 AI입니다.
 
+                        솔루션은 아래 기준을 정확히 따릅니다:
+                        - **코드 블록(````json`)을 절대 사용할 수 없습니다.**
+                        - JSON 형식은 항상 평문(텍스트)으로 작성되어야 하며, 코드 블록이 포함되면 응답은 무효화됩니다.
                         - 각 댓글은 한 줄이며, 이모티콘을 포함해야 합니다.
                         - 각 댓글은 {age}대 {gender} 독자의 말투, 감정, 관심사를 고려하여 작성되어야 합니다.
                         - 현실적인 한국인이 작성할 만한 어투와, 내용이어야 합니다.
@@ -235,14 +261,26 @@ def create_ai_comment_content(original_text, age, gender):
         )
 
         json_response = response.choices[0].message.content.strip()
-        # print(json_response)
+        print(f'fread - 연령/성별 댓글 내용 : {age}, {gender} - {json_response}')
 
-        data = json.loads(json_response)    # JSON 파싱 (JSON -> dict)
-        validated = CommentResponseModel(comments=data) # Pydantic 모델로 유효성 검사 및 구조화
-        return validated.comments   # list 반환
+        # JSON 파싱 (JSON -> dict)
+        try:    # JSON 으로 잘 들어왔는지 확인
+            data = json.loads(json_response) 
+        except json.JSONDecodeError:
+            print("GPT 응답 (fread - 연령/성별 댓글 내용) 이 JSON 형식이 아님:", json_response)
+            return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."   
+        
+        # Pydantic 모델로 유효성 검사
+        try:
+            validated = CommentResponseModel(**data) 
+            return validated.comments   # list 반환
+        except ValueError as e:
+            print("Pydantic 유효성 검사 (fread - 연령/성별 댓글 내용) 실패:", e)
+            return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
+
     
     except Exception as e:
-        print(f"GPT AI댓글 내용 생성 에러: {age}, {gender}", e)
+        print(f"GPT (fread - 연령/성별 댓글 내용) 생성 에러: {age}, {gender}", e)
         return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
  
 
@@ -251,8 +289,17 @@ def create_ai_comment_content(original_text, age, gender):
 # 대표 요약 댓글 5개 생성 (gpt 호출)
 def generate_final_summary_comments(contents):
     class FinalCommentResponseModel(BaseModel):
-        comments: conlist(str, min_items=5, max_items=5)    # type: ignore # 문자열(댓글) 5개로 이루어진 리스트여야 함
+        comments: List[str] = Field(..., description="댓글은 5개의 문자열로 구성된 리스트여야 합니다.")
 
+        @model_validator(mode="before")
+        def validate_comments(cls, values):
+            comments = values.get("comments")
+            if not isinstance(comments, list):
+                raise ValueError("comments는 리스트여야 합니다.")
+            if len(comments) != 5:
+                raise ValueError("댓글은 정확히 5개여야 합니다.")
+            return values
+        
     prompt = contents
 
     try:
@@ -265,6 +312,9 @@ def generate_final_summary_comments(contents):
                     "content": f"""
                         당신은 독자 50명의 댓글을 읽고, 핵심 반응을 5개의 대표 댓글로 요약하여 JSON 형식으로 반환하는 AI입니다.
 
+                        솔루션은 아래 기준을 정확히 따릅니다:
+                        - **코드 블록(````json`)을 절대 사용할 수 없습니다.**
+                        - JSON 형식은 항상 평문(텍스트)으로 작성되어야 하며, 코드 블록이 포함되면 응답은 무효화됩니다.
                         - 댓글을 창조하는 것이 아닌, 기존 댓글들을 분석하여 요약을 해야 합니다.
                         - 기존의 댓글과 내용이 완전히 일치해서는 안됩니다. 
                         - 현실적인 한국인이 작성할 만한 어투와, 내용이어야 합니다.
@@ -296,14 +346,26 @@ def generate_final_summary_comments(contents):
         )
 
         json_response = response.choices[0].message.content.strip()
-        # print(json_response)
+        print(f'fread - 대표 요약 댓글 : {json_response}')
 
-        data = json.loads(json_response)    # JSON 파싱 (JSON -> dict)
-        validated = FinalCommentResponseModel(comments=data) # Pydantic 모델로 유효성 검사 및 구조화
-        return validated.comments   # list 반환
+        # JSON 파싱 (JSON -> dict)
+        try:    # JSON 으로 잘 들어왔는지 확인
+            data = json.loads(json_response) 
+        except json.JSONDecodeError:
+            print("GPT 응답 (fread - 대표 요약 댓글) 이 JSON 형식이 아님:", json_response)
+            return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."   
+        
+        # Pydantic 모델로 유효성 검사
+        try:
+            validated = FinalCommentResponseModel(**data) 
+            return validated.comments   # list 반환
+        except ValueError as e:
+            print("Pydantic 유효성 검사 (fread - 대표 요약 댓글) 실패:", e)
+            return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
+
     
     except Exception as e:
-        print("GPT 대표 댓글 생성 에러:", e)
+        print("GPT (fread - 대표 요약 댓글) 생성 에러:", e)
         return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
 
 
@@ -312,8 +374,17 @@ def generate_final_summary_comments(contents):
 # 솔루션 생성 ===============================================================================================================
 def generate_fread_solutions(original_text):
     class SolutionResponseModel(BaseModel):
-        solutions: conlist(str, min_items=3, max_items=3)    # type: ignore # 문자열(댓글) 5개로 이루어진 리스트여야 함
+        solutions: List[str] = Field(..., description="솔루션은 3개의 문자열로 구성된 리스트여야 합니다.")
 
+        @model_validator(mode="before")
+        def validate_solutions(cls, values):
+            solutions = values.get("solutions")
+            if not isinstance(solutions, list):
+                raise ValueError("solutions 리스트여야 합니다.")
+            if len(solutions) != 3:
+                raise ValueError("솔루션은 정확히 3개여야 합니다.")
+            return values
+        
     prompt = original_text
 
     try:
@@ -329,6 +400,8 @@ def generate_fread_solutions(original_text):
                         당신의 역할은 소설 한 편을 읽고, 해당 소설의 완성도를 높일 수 있는 솔루션을 제시하는 것입니다. 
 
                         솔루션은 아래 기준을 정확히 따릅니다:
+                        - **코드 블록(````json`)을 절대 사용할 수 없습니다.**
+                        - JSON 형식은 항상 평문(텍스트)으로 작성되어야 하며, 코드 블록이 포함되면 응답은 무효화됩니다.
                         - 총 3개의 솔루션을 제시합니다.
                         - 각 솔루션은 150자 이내로 간결하게 작성합니다.
                         - 각 솔루션은 명확하고 실용적이어야 하며, 구체적인 예시를 포함합니다. 
@@ -347,7 +420,7 @@ def generate_fread_solutions(original_text):
                         📥 반드시 아래 JSON 형식으로만 응답하세요:
 
                         {{
-                            solutions:[
+                            "solutions":[
                                 "맞춤법을 더 신경 써 주세요. 예: '그녀는 맛있는것을 좋아하게 돼었다.' → '그녀는 맛있는 것을 좋아하게 되었다.'",
                                 "캐릭터의 감정을 더 구체적으로 표현해 보세요. 예: '슬펐다' → '눈물이 맺혔다.'",
                                 "배경 묘사를 더 생동감 있게 추가해 보세요. 예: '밤하늘이 어두웠다' → '별빛이 희미하게 반짝였다.'"
@@ -368,12 +441,25 @@ def generate_fread_solutions(original_text):
         )
 
         json_response = response.choices[0].message.content.strip()
-        # print(json_response)
+        print(f'fread - 솔루션 : {json_response}')
 
-        data = json.loads(json_response)    # JSON 파싱 (JSON -> dict)
-        validated = SolutionResponseModel(solutions=data) # Pydantic 모델로 유효성 검사 및 구조화
-        return validated.solutions   # list 반환
+
+        # JSON 파싱 (JSON -> dict)
+        try:    # JSON 으로 잘 들어왔는지 확인
+            data = json.loads(json_response) 
+        except json.JSONDecodeError:
+            print("GPT 응답 (fread - 솔루션) 이 JSON 형식이 아님:", json_response)
+            return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."   
+        
+        # Pydantic 모델로 유효성 검사
+        try:
+            validated = SolutionResponseModel(**data) 
+            return validated.solutions   # list 반환
+        except ValueError as e:
+            print("Pydantic 유효성 검사 (fread - 솔루션) 실패:", e)
+            return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
+
     
     except Exception as e:
-        print("GPT 솔루션 생성 에러:", e)
+        print("GPT (fread - 솔루션) 생성 에러:", e)
         return "잠시 분석이 원활하지 않았어요. 다시 시도해주세요."
