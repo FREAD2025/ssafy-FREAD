@@ -15,6 +15,7 @@ decorator==5.1.1
 distro==1.9.0
 Django==4.2.16
 django-allauth==65.7.0
+django-cors-headers==4.7.0
 djangorestframework==3.15.2
 drf-spectacular==0.28.0
 exceptiongroup==1.2.0
@@ -50,6 +51,7 @@ pydantic_core==2.33.2
 Pygments==2.17.2
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
+pywin32==310
 PyYAML==6.0.2
 pyzmq==26.2.1
 referencing==0.36.2

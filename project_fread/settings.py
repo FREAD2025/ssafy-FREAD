@@ -11,8 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-import os 
+import os
 from dotenv import load_dotenv
+
 # import environ
 
 # 프로젝트의 기본 경로 설정
@@ -26,7 +27,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # 카카오 API Key 가져오기
-KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
+KAKAO_REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
 # 반드시 카카오 개발자센터에서 다음 항목을 설정해야 함
 # Redirect URI:
 # 예: http://localhost:8000/accounts/kakao/login/callback/
@@ -36,7 +37,7 @@ KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # 보안 및 디버그 설정
-SECRET_KEY = 'django-insecure-0h-&0i*97nn^kh9d_j8sfzdu@169-)^2xxjl^4lj(ec$rrven9'
+SECRET_KEY = "django-insecure-0h-&0i*97nn^kh9d_j8sfzdu@169-)^2xxjl^4lj(ec$rrven9"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOSTS = []
@@ -45,91 +46,101 @@ ALLOWED_HOSTS = []
 # 설치된 앱 목록
 INSTALLED_APPS = [
     # 사용자 정의 앱
-    'users',
-    'analyses',
-    'contests',
+    "users",
+    "analyses",
+    "contests",
     ## django 기본 앱
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-     ## 소셜 로그인
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.kakao',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    ## 소셜 로그인
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.kakao",
     # DRF + Swagger 문서화
-    'rest_framework', 
-    'drf_spectacular', 
+    "rest_framework",
+    "drf_spectacular",
+    #
+    "corsheaders",
+    # 설치 필요한가?
+    # 'dj_rest_auth',
 ]
 
 # 인증 백엔드 설정 (allauth)
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend', # 기본 인증 백엔드
-    'allauth.account.auth_backends.AuthenticationBackend', # 소셜 로그인 백에드
+    "django.contrib.auth.backends.ModelBackend",  # 기본 인증 백엔드
+    "allauth.account.auth_backends.AuthenticationBackend",  # 소셜 로그인 백에드
 ]
 
 # 소셜 로그인 설정 (카카오)
-SITE_ID = 1 # allauth에서 사이트를 구분하기 위해 필요 (기본 1번 사용)
+SITE_ID = 1  # allauth에서 사이트를 구분하기 위해 필요 (기본 1번 사용)
 SOCIALACCOUNT_PROVIDERS = {
-    'kakao': {
-        'APP': {
-            'client_id': os.getenv('KAKAO_REST_API_KEY'),
-            'secret': '',  # 카카오 REST API 키에는 secret이 없음
-            'key': ''
+    "kakao": {
+        "APP": {
+            "client_id": os.getenv("KAKAO_REST_API_KEY"),
+            "secret": "",  # 카카오 REST API 키에는 secret이 없음
+            "key": "",
         },
-        'AUTH_PARAMS': {
-            'response_type': 'code',
+        "AUTH_PARAMS": {
+            "response_type": "code",
         },
-        'INIT_PARAMS': {
-            'scope': 'account_email profile',
+        "INIT_PARAMS": {
+            "scope": "account_email profile",
         },
-        'PROCESS': 'login_on_get'
+        "PROCESS": "login_on_get",
     }
 }
 
 # users\adapter.py의 CustomSocialAccountAdapter와 연결
 # is_social과 social_provider 필드를 설정하기 위해 추가함
-SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = "users.adapter.CustomSocialAccountAdapter"
 
 # 로그인/로그아웃 후 리디렉션 경로 설정
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = "/"
 # 예. LOGIN_REDIRECT_URL = 'books:index'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 # 예. ACCOUNT_LOGOUT_REDIRECT_URL = 'index'
-ACCOUNT_LOGOUT_ON_GET = True 
+ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # 미들웨어 설정
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware', # allauth에 필수
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # allauth에 필수
+    "corsheaders.middleware.CorsMiddleware",  # corsheaders와 함께 작성, vue와 연결하기 위해 작성
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
 ]
 
 # URL 설정
-ROOT_URLCONF = 'project_fread.urls'
+ROOT_URLCONF = "project_fread.urls"
 
 # 템플릿 설정
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request', # allauth에 필수
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",  # allauth에 필수
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -142,14 +153,14 @@ TEMPLATES = [
 """
 
 # WSGI 설정
-WSGI_APPLICATION = 'project_fread.wsgi.application'
+WSGI_APPLICATION = "project_fread.wsgi.application"
 
 # 데이터베이스 설정
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -157,49 +168,49 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 
 # 국제화 설정
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
-LANGUAGE_CODE = 'ko-kr' # 한국어로 수정
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = "ko-kr"  # 한국어로 수정
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
 
 # 정적/미디어 파일 설정 (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic 용
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"  # collectstatic 용
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # 커스텀 사용자 모델 설정
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
 # 개발용 이메일 출력용 (콘솔)
 # Django의 send_mail() 같은 기능 또는 allauth의 비밀번호 초기화 기능을 사용하면 필요함
 # 실제 이메일 발송 시 SMTP 서버 설정으로 변경해야 함
 # 실제 이메일 발송 시 EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD 등 설정 필요
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # 기본 발신자 이메일 주소 설정
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
@@ -207,16 +218,16 @@ DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
 # DRF 설정
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-    ], # 회원가입 후 자동 로그인을 위해 설정
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],  # 회원가입 후 자동 로그인을 위해 설정
 }
 
 # Swagger 설정
 SPECTACULAR_SETTINGS = {
-    'TITLE': '개인 작가 agent 서비스 API', # 서비스 이름 (헤더)
-    'DESCRIPTION': '개인 작가 agent 서비스 API 문서입니다.', # 서비스 설명
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "개인 작가 agent 서비스 API",  # 서비스 이름 (헤더)
+    "DESCRIPTION": "개인 작가 agent 서비스 API 문서입니다.",  # 서비스 설명
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }

@@ -10,7 +10,7 @@
     "model": "users.genre",
     "pk": 2,
     "fields": {
-        "name": "로멘스"
+        "name": "로맨스"
     }
 },
 {
