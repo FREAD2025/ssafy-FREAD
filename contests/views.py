@@ -11,6 +11,7 @@ from rest_framework.decorators import (
 from rest_framework.permissions import (
     IsAuthenticated,
     IsAdminUser,
+    IsAuthenticatedOrReadOnly,
 )  # 권한 클래스 (인증된 사용자, 관리자)
 from rest_framework.response import Response  # API 응답을 만들어주는 클래스
 from rest_framework.pagination import (
@@ -29,6 +30,8 @@ from drf_spectacular.utils import (
     OpenApiResponse,
 )  # Swagger (API 문서 자동 생성 도구
 
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.decorators import authentication_classes
 
 # 전체 공모전 목록 조회 및 등록 (/api/v1/contests/)
 @extend_schema(
@@ -166,7 +169,9 @@ def contest_list(request):
         ),
     },
 )
+# @authentication_classes([TokenAuthentication, BasicAuthentication])
 @api_view(["GET", "PUT", "DELETE"])
+@permission_classes([IsAuthenticatedOrReadOnly]) # 인증된 사용자만 수정/삭제 가능
 def contest_detail(request, contest_id):
     contest = get_object_or_404(
         Contest, pk=contest_id
@@ -221,6 +226,7 @@ def contest_detail(request, contest_id):
     },
 )
 @api_view(["POST", "DELETE"])
+@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인한 사용자만 접근 가능
 def like_contest(request, contest_id):
     contest = get_object_or_404(

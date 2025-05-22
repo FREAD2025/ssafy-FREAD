@@ -12,10 +12,13 @@ from ..serializers import AnalysisCreateSerializer, AnalysisListSerializer, Frea
 from ..utils.generate_fread_analysis import generate_fread_analysis_score, generate_fread_ai_comments, generate_fread_solutions
 from ..utils.generate_analysis import generate_title_from_gpt
 
-
+# 토큰 인증 설정
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.decorators import authentication_classes
 
 # 통합 분석 내역 전체 조회(GET)
 @ api_view(['GET'])
+@ authentication_classes([TokenAuthentication, BasicAuthentication])
 @ permission_classes([IsAuthenticated]) # 로그인한 사용자만 사용 가능
 def analysis_list(request):
     analyses = Analysis.objects.filter(user=request.user)
@@ -26,6 +29,7 @@ def analysis_list(request):
 
 # 통합 분석 내역 중 1 삭제 (DELETE)
 @ api_view(['DELETE'])
+@ authentication_classes([TokenAuthentication, BasicAuthentication])
 @ permission_classes([IsAuthenticated]) # 로그인한 사용자만 사용 가능
 def analysis(request, analysis_id):
     analysis = Analysis.objects.get(pk=analysis_id)
@@ -40,6 +44,7 @@ def analysis(request, analysis_id):
 
 # 프리드 분석 (GET, POST)
 class FreadAnalysisView(APIView):
+    authentication_classes = [TokenAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]  # 로그인한 사용자만 사용 가능
 
     # 프리드 분석 결과 요청 시

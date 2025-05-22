@@ -13,6 +13,7 @@ conf==0.4.1
 debugpy==1.8.12
 decorator==5.1.1
 distro==1.9.0
+dj-rest-auth==7.0.1
 Django==4.2.16
 django-allauth==65.7.0
 django-cors-headers==4.7.0
