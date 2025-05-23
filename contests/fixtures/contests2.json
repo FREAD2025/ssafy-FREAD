@@ -1,0 +1,18 @@
+[
+{
+    "model": "contests.contest",
+    "pk": 1,
+    "fields": {
+        "title": "공모전1",
+        "organizer": "주최자2",
+        "start_date": "2025-05-13",
+        "end_date": "2025-05-29",
+        "target_audience": "성인",
+        "has_prize": true,
+        "prize_details": "100",
+        "details_url": "",
+        "image": "",
+        "created_at": "2025-05-15T10:19:41.878Z"
+    }
+}
+]

@@ -10,6 +10,7 @@ class ContestSerializer(serializers.ModelSerializer):
     - 전체 공모전 목록 또는 상세 페이지 등에서 사용된다.
     - 사용자가 공모전을 '찜(like)'했는지 여부를 is_liked 필드로 확인할 수 있다.
     """
+    image = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()  # 찜한 사용자 수 계산
 
@@ -18,10 +19,17 @@ class ContestSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'organizer', 'start_date', 'end_date',
             'target_audience', 'has_prize', 'prize_details', 'details_url',
-            'image', 'created_at', 'is_liked', 'likes_count'
+            'image', 'created_at', 'is_liked', 'likes_count',
         ]
         read_only_fields = ['id', 'created_at']
 
+    def get_image(self, obj):
+        request = self.context.get("request")
+        # 이미지가 있으면 절대 URL로, 없으면 None
+        if obj.image and hasattr(obj.image, "url"):
+            return request.build_absolute_uri(obj.image.url)
+        return None
+    
     # 찜하기 기능
     def get_is_liked(self, obj):
         # obj는 각 공모전 객체
@@ -60,11 +68,11 @@ class SimpleContestSerializer(serializers.ModelSerializer):
         model = Contest
         fields = [
             'id', 'title', 'organizer', 'start_date', 'end_date', 
-            'target_audience', 'has_prize', 'is_liked', 'likes_count'
+            'target_audience', 'has_prize', 'is_liked', 'likes_count', 'image', 'details_url', 'prize_details', 'created_at'
         ]
         read_only_fields = [
             'id', 'title', 'organizer', 'start_date', 'end_date', 
-            'target_audience', 'has_prize', 'is_liked', 'likes_count'
+            'target_audience', 'has_prize', 'is_liked', 'likes_count', 'image', 'details_url', 'prize_details', 'created_at'
         ]
 
     # 찜하기 기능

@@ -250,6 +250,7 @@ def like_contest(request, contest_id):
                 "status": "liked",
                 "message": "공모전을 찜했습니다.",
                 "likes_count": likes_count,
+                "is_liked": True,
             },
             status=status.HTTP_200_OK,
         )  # 200 OK 응답과 함께 성공 메시지 반환
@@ -272,6 +273,7 @@ def like_contest(request, contest_id):
                 "status": "unliked",
                 "message": "공모전 찜을 해제했습니다.",
                 "likes_count": likes_count,
+                "is_liked": False,
             },
             status=status.HTTP_200_OK,
         )  # 200 OK 응답과 함께 성공 메시지 반환
