@@ -67,8 +67,12 @@ INSTALLED_APPS = [
     "drf_spectacular",
     #
     "corsheaders",
-    # 설치 필요한가?
-    # 'dj_rest_auth',
+    # 토큰 인증 설정
+    "rest_framework.authtoken",
+    "dj_rest_auth",
+    # 만약 회원가입도 필요하다면 설정
+    # pip install dj-rest-auth[with-social]
+    # 'dj_rest_auth.registration',
 ]
 
 # 인증 백엔드 설정 (allauth)
@@ -125,7 +129,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
 ]
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True  # 이 설정이 활성화되면, 클라이언트(예: 웹 브라우저)가 서버에 요청을 보낼 때 쿠키나 HTTP 인증 정보를 포함할 수 있다.
+# 세션 인증 시 CORS_ALLOW_CREDENTIALS = True 설정 필요
+
 # URL 설정
 ROOT_URLCONF = "project_fread.urls"
 
@@ -220,8 +226,13 @@ DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",  # 토큰 인증 설정
+        "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],  # 회원가입 후 자동 로그인을 위해 설정
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
 }
 
 # Swagger 설정

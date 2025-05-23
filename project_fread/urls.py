@@ -38,6 +38,10 @@ urlpatterns = [
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     # Spectacular Redoc UI URL 
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    # 토큰 인증 설정
+    path('api/v1/auth/', include('dj_rest_auth.urls')), 
+    # 회원가입도 설정한다면
+    # path('api/v1/auth/signup/', include('dj_rest_auth.registration.urls'))
 ]
 
 # 개발 환경에서 Media 파일 및 Static 파일 제공

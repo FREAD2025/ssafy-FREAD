@@ -24,6 +24,9 @@ from rest_framework.pagination import PageNumberPagination
 
 from django.contrib.auth import authenticate
 
+# 토큰 인증 설정
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.decorators import authentication_classes
 
 # 회원 가입 (/api/v1/users/signup/)
 @extend_schema(  # swagger에서 표시
@@ -81,6 +84,7 @@ def signup(request):
     },
 )
 @api_view(["POST"])  # PUT으로 바꾸는 것 고려해보기
+@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인한 사용자라면
 def social_extra_info(request):
     user = request.user  # 현재 로그인한 사용자
@@ -145,6 +149,7 @@ def login(request):
     },
 )
 @api_view(["POST"])
+@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인한 사용자만 가능
 def logout(request):
     auth_logout(request)
@@ -296,6 +301,7 @@ def reset_password(request):
     },
 )
 @api_view(["POST"])
+@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인된 사용자만 가능
 def password_change(request):
     serializer = PasswordChangeSerializer(
@@ -332,6 +338,7 @@ def password_change(request):
     },
 )
 @api_view(["PUT", "DELETE"])
+@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인한 사용자만 가능
 def profile(request):
     user = request.user
@@ -364,6 +371,7 @@ def profile(request):
     },
 )
 @api_view(["GET"])
+@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인된 사용자만 접근 가능
 def mypage(request):
     user = request.user
@@ -386,6 +394,7 @@ def mypage(request):
     },
 )
 @api_view(["GET"])
+@authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인된 사용자만 접근 가능
 def liked_contests(request):
     # 현재 사용자가 찜한 공모전 목록을 가져옵니다.
