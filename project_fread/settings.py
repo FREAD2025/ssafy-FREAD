@@ -68,8 +68,8 @@ INSTALLED_APPS = [
     #
     "corsheaders",
     # 토큰 인증 설정
-    'rest_framework.authtoken',
-    'dj_rest_auth',
+    "rest_framework.authtoken",
+    "dj_rest_auth",
     # 만약 회원가입도 필요하다면 설정
     # pip install dj-rest-auth[with-social]
     # 'dj_rest_auth.registration',
@@ -105,9 +105,11 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_ADAPTER = "users.adapter.CustomSocialAccountAdapter"
 
 # 로그인/로그아웃 후 리디렉션 경로 설정
-LOGIN_REDIRECT_URL = "/"
+# LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 # 예. LOGIN_REDIRECT_URL = 'books:index'
-ACCOUNT_LOGOUT_REDIRECT_URL = "/"
+# ACCOUNT_LOGOUT_REDIRECT_URL = "/"
+ACCOUNT_LOGOUT_REDIRECT_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 # 예. ACCOUNT_LOGOUT_REDIRECT_URL = 'index'
 ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
@@ -129,7 +131,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
 ]
-CORS_ALLOW_CREDENTIALS = True # 이 설정이 활성화되면, 클라이언트(예: 웹 브라우저)가 서버에 요청을 보낼 때 쿠키나 HTTP 인증 정보를 포함할 수 있다.
+CORS_ALLOW_CREDENTIALS = True  # 이 설정이 활성화되면, 클라이언트(예: 웹 브라우저)가 서버에 요청을 보낼 때 쿠키나 HTTP 인증 정보를 포함할 수 있다.
 # 세션 인증 시 CORS_ALLOW_CREDENTIALS = True 설정 필요
 
 # URL 설정
@@ -226,12 +228,12 @@ DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.TokenAuthentication", # 토큰 인증 설정
+        "rest_framework.authentication.TokenAuthentication",  # 토큰 인증 설정
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],  # 회원가입 후 자동 로그인을 위해 설정
     "DEFAULT_PERMISSION_CLASSES": [
-        'rest_framework.permissions.AllowAny',
+        "rest_framework.permissions.AllowAny",
     ],
 }
 
