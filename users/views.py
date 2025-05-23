@@ -28,6 +28,27 @@ from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from rest_framework.decorators import authentication_classes
 
+# 토큰 발급 설정
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
+
+# 토큰 발급
+@api_view(["GET"])
+@authentication_classes(
+    [SessionAuthentication]
+)  # 이 API는 세션 쿠키로 사용자를 인증합니다.
+@permission_classes([IsAuthenticated])  # 인증된 사용자만 접근 가능합니다.
+def get_auth_token(request):
+    """
+    현재 세션으로 로그인된 사용자에게 DRF 인증 토큰을 발급하거나 반환합니다.
+    소셜 로그인 후 프론트엔드에서 이 API를 호출하여 API 통신용 토큰을 얻습니다.
+    """
+    user = request.user
+    token, created = Token.objects.get_or_create(user=user)
+    return Response({"token": token.key})
+
+
 # 회원 가입 (/api/v1/users/signup/)
 @extend_schema(  # swagger에서 표시
     summary="회원 가입",
@@ -270,7 +291,8 @@ def reset_password(request):
             )
             return Response(
                 {
-                    "message": "임시 비밀번호가 이메일로 발송되었습니다. 로그인 후 비밀번호를 변경해 주세요."
+                    "message": f"임시 비밀번호가 이메일로 발송되었습니다. 로그인 후 비밀번호를 변경해 주세요. 임시 비밀번호: {temp_password}",
+                    "find": True,
                 },
                 status=status.HTTP_200_OK,
             )
