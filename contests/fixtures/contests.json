@@ -27,7 +27,7 @@
       "has_prize": false,
       "prize_details": "",
       "details_url": "https://www.wege2017.com/",
-      "image": "http://127.0.0.1:8000/media/http%3A/127.0.0.1%3A8000/media/contest_images/%25EB%258F%2585%25EB%25A6%25BD%25EB%25AC%25B8%25EC%2598%2588%25EC%25A7%2580_%25EA%25B3%25B5%25EB%25AA%25A8%25EC%25A0%2584.jpg",
+      "image": "",
       "created_at": "2025-05-23T14:23:43.175052Z"
     }
   },
@@ -43,7 +43,7 @@
       "has_prize": true,
       "prize_details": "총 상금 1,000만원",
       "details_url": "https://cafe.daum.net/starcafe-KRIL/ZCcp/267",
-      "image": "http://127.0.0.1:8000/media/contest_images/%ED%99%98%EA%B2%BD_%EB%B0%B1%EC%9D%BC%EC%9E%A5_%EA%B3%B5%EB%AA%A8%EC%A0%84_FJhiWiH.jpg",
+      "image": "contest_images/환경_백일장_공모전.jpg",
       "created_at": "2025-05-23T14:28:55.584610Z"
     }
   },
@@ -59,7 +59,7 @@
       "has_prize": true,
       "prize_details": "총상금 : 400만원 / 1위 : 300만원",
       "details_url": "",
-      "image": "http://127.0.0.1:8000/media/contest_images/%EC%A0%9C_15%ED%9A%8C_%EC%8B%A0%EB%AC%B4%EA%B5%B0%EC%82%B0%EB%AC%B8%ED%95%99%EC%83%81_%EA%B3%B5%EB%AA%A8%EC%A0%84_cOupWss.jpg",
+      "image": "contest_images/제_15회_신무군산문학상_공모전.jpg",
       "created_at": "2025-05-23T14:32:14.422918Z"
     }
   },
@@ -75,7 +75,7 @@
       "has_prize": true,
       "prize_details": "총상금 : 200만원 / 1위 : 200만원",
       "details_url": "https://blog.naver.com/sangsangin123/223828857252",
-      "image": "http://127.0.0.1:8000/media/contest_images/2025_%EC%B5%9C%EC%B9%98%EC%9B%90%EC%8B%A0%EC%9D%B8%EB%AC%B8%ED%95%99%EC%83%81_%EA%B3%B5%EB%AA%A8%EC%A0%84_TVSubIm.jpg",
+      "image": "contest_images/2025_최치원신인문학상_공모전.jpg",
       "created_at": "2025-05-23T14:33:44.653049Z"
     }
   },
@@ -91,7 +91,7 @@
       "has_prize": true,
       "prize_details": "각 부문 200만원",
       "details_url": "https://blog.naver.com/sangsangin123",
-      "image": "http://127.0.0.1:8000/media/contest_images/2026%EB%85%84_%EC%83%81%EC%83%81%EC%9D%B8_%EC%8B%A0%EC%B6%98%EB%AC%B8%EC%98%88_%EA%B3%B5%EB%AA%A8_LMJ7avc.jpg",
+      "image": "contest_images/2026년_상상인_신춘문예_공모.jpg",
       "created_at": "2025-05-23T14:35:45.053774Z"
     }
   },
@@ -107,7 +107,7 @@
       "has_prize": true,
       "prize_details": "총상금 : 10,000만원 / 1위 : 10,000만원",
       "details_url": "https://www.ulsannamgu.go.kr/cop/bbs/selectBoardArticle.do?bbsId=namguNews&nttId=460333",
-      "image": "http://127.0.0.1:8000/media/contest_images/%EC%99%B8%EC%95%99%EA%B0%84_%EC%9E%A5%ED%8E%B8%EC%86%8C%EC%84%A4_%EA%B3%B5%EB%AA%A8%EC%A0%84_dq40p2u.jpg",
+      "image": "contest_images/외앙간_장편소설_공모전.jpg",
       "created_at": "2025-05-23T14:37:42.143742Z"
     }
   },
@@ -155,7 +155,7 @@
       "has_prize": true,
       "prize_details": "상금+상품(총상금 : 1,500만원 / 1위 : 500만원 / 상장 )",
       "details_url": "https://www.diciackl.or.kr/program/view.do?programKey=123&searchActiveFlag=Y&searchCategory=program&menuKey=73&currentPageNo=1",
-      "image": "http://127.0.0.1:8000/media/contest_images/%EB%8C%80%EC%A0%84_%EB%8B%A8%ED%8E%B8%EC%86%8C%EC%84%A4_%EA%B3%B5%EB%AA%A8%EC%A0%84.jpg",
+      "image": "contest_images/대전_단편소설_공모전.jpg",
       "created_at": "2025-09-01T09:00:00Z"
     }
   },
@@ -171,7 +171,7 @@
       "has_prize": true,
       "prize_details": "총상금 : 800만원 / 1위 : 100만원",
       "details_url": "https://www.nosa.or.kr/portal/nosa/FoundNews/bizNotice?bltnNo=11745904061666",
-      "image": "http://127.0.0.1:8000/media/contest_images/%EB%8B%A4%EC%8B%9C_%EC%8B%9C%EC%9E%91%ED%95%98%EB%8A%94_%EC%A4%91%EC%9E%A5%EB%85%84_%EA%B3%B5%EB%AA%A8%EC%A0%84.jpg",
+      "image": "contest_images/다시_시작하는_중장년_공모전.jpg",
       "created_at": "2025-07-15T09:00:00Z"
     }
   },
@@ -203,7 +203,7 @@
       "has_prize": true,
       "prize_details": "각 부문 200만원",
       "details_url": "https://blog.naver.com/sangsangin123",
-      "image": "http://127.0.0.1:8000/media/contest_images/2026%EB%85%84_%EC%83%81%EC%83%81%EC%9D%B8_%EC%8B%A0%EC%B6%98%EB%AC%B8%EC%98%88_%EA%B3%B5%EB%AA%A8_jTdYrVZ.jpg",
+      "image": "contest_images/2026년_상상인_신춘문예_공모_jTdYrVZ.jpg",
       "created_at": "2025-11-20T09:00:00Z"
     }
   },
@@ -219,7 +219,7 @@
       "has_prize": true,
       "prize_details": "시장상 1명 (수상작 그림책 발간)",
       "details_url": "https://e-gimpomaru.gimpo.go.kr/yanggok/selectBbsNttView.do?bbsNo=35&key=2937&nttNo=911040",
-      "image": "http://127.0.0.1:8000/media/contest_images/%EC%96%91%EA%B3%A1%EB%8F%84%EC%84%9C%EA%B4%80_%EB%8F%99%ED%99%94%EC%B1%85_%EA%B3%B5%EB%AA%A8%EC%A0%84.jpg",
+      "image": "contest_images/양곡도서관_동화책_공모전.jpg",
       "created_at": "2025-10-01T09:00:00Z"
     }
   },
@@ -235,7 +235,7 @@
       "has_prize": true,
       "prize_details": "상품(도서 상품권)",
       "details_url": "https://cafe.daum.net/gwangyangliterature/LwKV/1",
-      "image": "http://127.0.0.1:8000/media/contest_images/24%ED%9A%8C_%EA%B3%B5%EB%AA%A8%EC%A0%84.png",
+      "image": "contest_images/24회_공모전.png",
       "created_at": "2025-03-10T09:00:00Z"
     }
   },
@@ -299,7 +299,7 @@
       "has_prize": true,
       "prize_details": "총상금 : 500만원 / 1위 : 200만원",
       "details_url": "https://blog.naver.com/nogunri_ipf/223871955578",
-      "image": "http://127.0.0.1:8000/media/contest_images/%EB%85%B8%EA%B7%BC%EB%A6%AC_%EC%9D%B8%EA%B6%8C_%EB%B0%B1%EC%9D%BC%EC%9E%A5.png",
+      "image": "contest_images/노근리_인권_백일장.png",
       "created_at": "2025-09-15T09:00:00Z"
     }
   },
@@ -315,7 +315,7 @@
       "has_prize": true,
       "prize_details": "총상금 : 1,100만원 / 1위 : 400만원",
       "details_url": "https://www.jbpresscenter.com/",
-      "image": "http://127.0.0.1:8000/media/contest_images/%EC%A0%84%EB%B6%81%EB%8C%80_%EA%B3%B5%EB%AA%A8%EC%A0%84.jpg",
+      "image": "contest_images/전북대_공모전.jpg",
       "created_at": "2025-08-10T09:00:00Z"
     }
   }
