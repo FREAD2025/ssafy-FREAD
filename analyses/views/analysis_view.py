@@ -108,6 +108,7 @@ class FreadAnalysisView(APIView):
 
             # 모든 데이터가 잘 생성됐다면 (fread analysis)
             FreadAnalysis.objects.create(
+                original_text = original_text,
                 analysis_id = analysis,  # OneToOneField 연결
                 total = score_data.total,
                 logic = score_data.logic,

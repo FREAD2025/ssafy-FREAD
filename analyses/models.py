@@ -64,7 +64,8 @@ class FreadAnalysis(models.Model):
         related_name='analysis_result',
         verbose_name='연결된 통합 분석'
     )
-
+    # 분석에 쓰인 원본 텍스트
+    original_text = models.TextField(verbose_name='원본 텍스트')
     total = models.FloatField(verbose_name='완성도')    # 타 점수들의 평균
     logic = models.IntegerField(verbose_name='설득력 점수')
     appeal = models.IntegerField(verbose_name='전달력 점수')

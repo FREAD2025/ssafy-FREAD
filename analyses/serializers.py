@@ -50,7 +50,7 @@ class AnalysisCreateSerializer(serializers.ModelSerializer):
 class FreadAnalysisSerializer(serializers.ModelSerializer):
     class Meta:
         model = FreadAnalysis
-        fields = ('total', 'logic', 'appeal', 'focus', 'simplicity', 'popularity', 'ai_comments_data', 'solutions_data',)
+        fields = ('original_text', 'total', 'logic', 'appeal', 'focus', 'simplicity', 'popularity', 'ai_comments_data', 'solutions_data',)
 
 
 
