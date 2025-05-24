@@ -359,11 +359,14 @@ def password_change(request):
         ),
     },
 )
-@api_view(["PUT", "DELETE"])
+@api_view(["GET", "PUT", "DELETE"])
 @authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인한 사용자만 가능
 def profile(request):
     user = request.user
+    if request.method == "GET":
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     if request.method == "DELETE":  # 회원 탈퇴
         auth_logout(request)  # 즉시 로그아웃(현재 활성 세션 종료)
         user.delete()
