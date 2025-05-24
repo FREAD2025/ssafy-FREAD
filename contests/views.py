@@ -71,7 +71,7 @@ def contest_list(request):
         paginator = (
             PageNumberPagination()
         )  # 페이지네이션 기능을 사용하기 위한 객체 생성
-        paginator.page_size = 15  # 한 페이지당 15개 표시
+        paginator.page_size = 10  # 한 페이지당 10개 표시
         page = paginator.paginate_queryset(
             queryset, request
         )  # 가져온 공모전 목록을 요청에 따라 페이지로 나눔
