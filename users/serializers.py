@@ -399,6 +399,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "profile_image",
             "is_profile_completed",
             "is_social",
+            "date_joined",
         ]
         # read_only_fields =
         extra_kwargs = {
@@ -410,6 +411,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "profile_image": {"required": False, "allow_null": True},
             "is_profile_completed": {"required": False, "read_only": True},
             "is_social": {"required": False, "read_only": True},
+            "date_joined": {"required": False, "read_only": True},
         }
 
     # username 중복 확인
