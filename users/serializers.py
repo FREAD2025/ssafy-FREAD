@@ -397,6 +397,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "genres",
             "author_status",
             "profile_image",
+            "is_profile_completed",
+            "is_social",
         ]
         # read_only_fields =
         extra_kwargs = {
@@ -406,6 +408,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "phone_number": {"required": False, "allow_blank": True},
             "author_status": {"required": True, "allow_blank": False},
             "profile_image": {"required": False, "allow_null": True},
+            "is_profile_completed": {"required": False, "read_only": True},
+            "is_social": {"required": False, "read_only": True},
         }
 
     # username 중복 확인
