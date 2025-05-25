@@ -207,6 +207,7 @@ class SocialExtraInfoSerializer(serializers.ModelSerializer):
             "author_status",
             "profile_image",
             "email",
+            "is_profile_completed",
         ]  # 추가 작성할 필드 목록
         extra_kwargs = {
             # 필수 필드

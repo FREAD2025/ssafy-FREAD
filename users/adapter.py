@@ -2,7 +2,7 @@
 # 추가 설정이나 필드 저장을 하고 싶을 때 사용함
 # is_social, social_provider를 설정하기 위해 추가함
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-
+from rest_framework.authtoken.models import Token
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     # 소셜 로그인 직후 호출되는 함수
@@ -12,6 +12,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         user = super().save_user(request, sociallogin, form)
         user.is_social = True
         user.social_provider = sociallogin.account.provider  # 'kakao'
+        token, created = Token.objects.get_or_create(user=user)
+        sociallogin.state["authtoken"] = token.key
         user.save()
         return user
 

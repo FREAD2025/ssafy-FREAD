@@ -14,7 +14,7 @@ from .serializers import (
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from drf_spectacular.utils import extend_schema, OpenApiResponse  # swagger
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail  # 이메일 발송
 from django.utils.crypto import get_random_string
@@ -25,12 +25,11 @@ from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth import authenticate
 
 # 토큰 인증 설정
-from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication, SessionAuthentication
 from rest_framework.decorators import authentication_classes
 
 # 토큰 발급 설정
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
 
 # 토큰 발급
@@ -104,7 +103,7 @@ def signup(request):
         ),
     },
 )
-@api_view(["POST"])  # PUT으로 바꾸는 것 고려해보기
+@api_view(["PUT"])  # PUT으로 바꾸는 것 고려해보기
 @authentication_classes([TokenAuthentication, BasicAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인한 사용자라면
 def social_extra_info(request):
@@ -170,12 +169,20 @@ def login(request):
     },
 )
 @api_view(["POST"])
-@authentication_classes([TokenAuthentication, BasicAuthentication])
+@authentication_classes([TokenAuthentication, BasicAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인한 사용자만 가능
 def logout(request):
     auth_logout(request)
     return Response({"message": "로그아웃 성공"}, status=status.HTTP_200_OK)
 
+# 소셜 로그인 로그아웃을 위해 진행이 필요할 수 있음
+# 현재는 withCredentials: true 로 보내서 세션 쿠키까지 같이 보내고 삭제되는 것처럼 보임
+# @api_view(['POST'])
+# def logout(request):
+#     auth_logout(request)
+#     response = Response({'detail': '로그아웃 완료'})
+#     response.delete_cookie('sessionid')  # 세션 쿠키 만료
+#     return response
 
 # 세션 유지 확인 (/api/v1/users/session-check/)
 @extend_schema(
@@ -360,10 +367,14 @@ def password_change(request):
     },
 )
 @api_view(["GET", "PUT", "DELETE"])
-@authentication_classes([TokenAuthentication, BasicAuthentication])
+@authentication_classes([TokenAuthentication, BasicAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])  # 로그인한 사용자만 가능
 def profile(request):
     user = request.user
+    print('###################################')
+    print('request.user', request.user)
+    print('request.user.is_authenticated', request.user.is_authenticated)
+    print('###################################')
     if request.method == "GET":
         serializer = ProfileSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
