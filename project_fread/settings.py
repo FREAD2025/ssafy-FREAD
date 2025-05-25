@@ -128,11 +128,21 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5173",
+    # "http://127.0.0.1:5173",
     "http://localhost:5173",
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    # "http://127.0.0.1:5173",
+]
+
+SESSION_COOKIE_SAMESITE = "Lax"
+
 CORS_ALLOW_CREDENTIALS = True  # 이 설정이 활성화되면, 클라이언트(예: 웹 브라우저)가 서버에 요청을 보낼 때 쿠키나 HTTP 인증 정보를 포함할 수 있다.
 # 세션 인증 시 CORS_ALLOW_CREDENTIALS = True 설정 필요
+
+SESSION_COOKIE_SECURE = False # 개발 시에는 false로 설정함
 
 # URL 설정
 ROOT_URLCONF = "project_fread.urls"
